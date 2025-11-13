@@ -2,433 +2,761 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>Eşleme Oyunu – 4 Seçenekli</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Pika & Berk – Çok Modlu Nesne Eşleme</title>
+
 <style>
-    body {
-        margin: 0;
-        background: linear-gradient(#8fd3ff, #b9e1ff);
-        font-family: Arial, sans-serif;
-        overflow: hidden;
-        user-select: none;
-    }
+/* Genel gövde */
+body{
+  margin:0;
+  font-family:"Comic Sans MS",system-ui,sans-serif;
+  background:linear-gradient(to bottom,#ffe0c2,#ffd1a1);
+  height:100vh;
+  overflow:hidden;
+}
 
-    /* --------------------- KART TASARIMI ---------------------- */
-    .card {
-        width: 150px;
-        height: 200px;
-        background: #fff;
-        border-radius: 15px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: space-between;
-        padding: 10px;
-        font-weight: bold;
-        position: absolute;
-    }
+/* ===================== ANA MENÜ ===================== */
+#menuScreen{
+  width:100%;
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+.menu-container{
+  width:90%;
+  max-width:500px;
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+.menu-title{
+  text-align:center;
+  font-size:32px;
+  font-weight:800;
+  color:#b65600;
+  margin-bottom:8px;
+  text-shadow:2px 2px #ffffff;
+}
+.menu-sub{
+  text-align:center;
+  font-size:16px;
+  color:#6b3c07;
+  margin-bottom:8px;
+}
+.menu-btn{
+  width:100%;
+  padding:14px 18px;
+  border-radius:18px;
+  background:#ff9f45;
+  border:3px solid #ff7a00;
+  color:#fff;
+  font-size:20px;
+  font-weight:700;
+  cursor:pointer;
+  transition:transform .18s,box-shadow .18s,background .18s;
+  box-shadow:0 4px 10px rgba(0,0,0,.18);
+}
+.menu-btn:hover{
+  transform:scale(1.03);
+  background:#ff8c1a;
+}
+.menu-btn:active{
+  transform:scale(.97);
+  box-shadow:0 2px 6px rgba(0,0,0,.25);
+}
 
-    .card img {
-        width: 80%;
-        height: 80%;
-        object-fit: contain;
-    }
+/* ===================== OYUN EKRANI ===================== */
+#gameScreen{
+  width:100%;
+  height:100vh;
+  position:relative;
+  display:none;  /* menüden sonra açılacak */
+  background:linear-gradient(to bottom right,#b3e5fc,#e1f5fe);
+}
 
-    .turkishName {
-        font-size: 18px;
-        margin-top: 5px;
-        text-transform: uppercase;
-    }
+/* Yönerge kutusu */
+#instructionBox{
+  position:absolute;
+  top:20px;
+  left:20px;
+  width:260px;
+  padding:10px 12px;
+  background:#ffe2b3;
+  border:3px solid #ff9b42;
+  border-radius:12px;
+  box-shadow:0 3px 8px rgba(0,0,0,.12);
+  color:#5c3204;
+  z-index:20;
+}
+#instructionBox .title{
+  font-weight:800;
+  margin-bottom:4px;
+}
+#instructionBox .line{
+  font-size:13px;
+  font-weight:700;
+  text-transform:uppercase;
+  margin:1px 0;
+}
+#dynamicInstruction{
+  font-weight:800;
+}
 
-    .englishName {
-        font-size: 14px;
-        margin-bottom: 5px;
-        color: #444;
-    }
+/* Üst seçenek kartları satırı */
+#optionsRow{
+  position:absolute;
+  top:120px;             /* yönergenin altı */
+  left:50%;
+  transform:translateX(-50%);
+  display:flex;
+  gap:32px;              /* birbirine yakın & eşit aralık */
+  justify-content:center;
+  align-items:flex-start;
+  z-index:5;
+}
 
-    /* -------------------- 4 SEÇENEKLİ KARTLAR --------------------- */
-    .option-row {
-        position: absolute;
-        top: 120px;  /* Yönerge kutusundan sonra başlasın */
-        width: 100%;
-        display: flex;
-        justify-content: center;
-        gap: 60px; /* Eşit mesafe */
-        z-index: 2;
-    }
+/* Kart tasarımı */
+.option-card,.drag-card{
+  width:150px;
+  height:200px;
+  background:#fff;
+  border-radius:15px;
+  box-shadow:0 4px 10px rgba(0,0,0,.2);
+  border:3px solid rgba(11,132,165,.45);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:space-between;
+  padding:8px;
+  user-select:none;
+}
+.card-tr{
+  font-size:16px;
+  font-weight:800;
+  text-transform:uppercase;
+  margin-top:2px;
+  text-align:center;
+}
+.card-img{
+  width:80%;
+  height:70%;
+  object-fit:contain;
+}
+.card-en{
+  font-size:13px;
+  font-style:italic;
+  color:#444;
+  margin-bottom:4px;
+}
 
-    /* ----------------------- DRAG KARTI ---------------------------- */
-    #dragCard {
-        top: 360px;
-        left: 50%;
-        transform: translateX(-50%);
-        cursor: grab;
-        z-index: 5;
-    }
+/* Sürüklenen kart (çocuğun kartı) */
+#dragCard{
+  position:absolute;
+  bottom:18%;           /* biraz daha aşağı */
+  left:50%;
+  transform:translateX(-50%);
+  cursor:grab;
+  z-index:10;
+}
 
-    /* ------------------------ YÖNERGE KUTUSU ---------------------- */
-    #instructionBox {
-        position: absolute;
-        top: 20px;
-        left: 20px;
-        width: 260px;
-        padding: 12px;
-        background: #ffe2b3;
-        border: 3px solid #ff9b42;
-        border-radius: 12px;
-        font-weight: bold;
-        z-index: 10;
-        font-size: 17px;
-        line-height: 22px;
-    }
+/* Doğru / yanlış görsel geri bildirim */
+.correct{
+  border-color:#2ecc71!important;
+  box-shadow:0 0 18px rgba(46,204,113,.85)!important;
+}
+.wrong{
+  border-color:#e74c3c!important;
+  box-shadow:0 0 18px rgba(231,76,60,.85)!important;
+}
 
-    /* ------------------------ SEMBOL BAR --------------------------- */
-    #symbolBar {
-        position: absolute;
-        bottom: 40px;
-        width: 100%;
-        text-align: center;
-        font-size: 32px;
-        letter-spacing: 10px;
-    }
+/* Sembol barı (alt ortada) */
+#symbolBar{
+  position:absolute;
+  bottom:5%;            /* biraz daha aşağı */
+  left:50%;
+  transform:translateX(-50%);
+  display:flex;
+  gap:6px;
+  padding:6px 10px;
+  border-radius:10px;
+  background:rgba(255,255,255,.65);
+  box-shadow:0 2px 6px rgba(0,0,0,.18);
+  z-index:12;
+}
+.bar-slot{
+  width:22px;
+  height:22px;
+  border-radius:6px;
+  background:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:16px;
+  transition:opacity .25s,transform .25s;
+}
+.bar-slot.empty{
+  opacity:.3;
+  transform:scale(.9);
+}
 
-    /* --------------------- SEMBOL TAHTASI -------------------------- */
-    #symbolBoard {
-        width: 260px;
-        height: 120px;
-        border: 2px dashed rgba(255,255,255,0.5);
-        position: absolute;
-        right: 40px;
-        bottom: 40px;
-        border-radius: 10px;
-        font-size: 32px;
-        padding: 10px;
-    }
+/* Sembol tahtası (sağ altta) */
+#symbolBoard{
+  position:absolute;
+  right:20px;
+  bottom:20px;
+  width:260px;
+  height:120px;
+  background:url('https://cdn.pixabay.com/photo/2014/04/02/10/56/wood-306955_1280.png')center/cover no-repeat;
+  border-radius:14px;
+  padding:10px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  justify-content:center;
+  align-items:center;
+  box-shadow:0 4px 10px rgba(0,0,0,.25);
+}
+.slot{
+  width:30px;
+  height:30px;
+  border-radius:8px;
+  background:rgba(255,255,255,.25);
+  text-align:center;
+  line-height:30px;
+  font-size:22px;
+  opacity:.3;
+  cursor:pointer;
+  transition:all .25s;
+}
+.slot.active{
+  opacity:1;
+  transform:scale(1.06);
+}
 
-    /* SES BUTONU */
-    #soundBtn {
-        position: absolute;
-        bottom: 10px;
-        right: 10px;
-        padding: 8px 14px;
-        background: #fff;
-        border-radius: 10px;
-        border: 1px solid #888;
-        cursor: pointer;
-        font-weight: bold;
-        z-index: 20;
-    }
+/* Uçan yıldız animasyonu */
+#flyStar{
+  position:absolute;
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  background:gold;
+  box-shadow:0 0 12px rgba(255,215,0,.9);
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%) scale(0);
+  opacity:0;
+  pointer-events:none;
+  z-index:999;
+  transition:all .35s;
+}
+
+/* Ses ve geri butonları */
+#toggleAudio,#backToMenu{
+  position:absolute;
+  right:20px;
+  padding:8px 12px;
+  border-radius:18px;
+  border:0;
+  font-weight:700;
+  cursor:pointer;
+  box-shadow:0 3px 8px rgba(0,0,0,.2);
+  background:#1976d2;
+  color:#fff;
+  z-index:30;
+}
+#toggleAudio{ bottom:20px; }
+#backToMenu{
+  top:20px;
+  background:#ff9f45;
+}
+
+/* Küçük ekran uyumu */
+@media(max-width:768px){
+  #optionsRow{
+    gap:16px;
+    transform:translateX(-50%) scale(.9);
+  }
+  .option-card,.drag-card{
+    width:135px;
+    height:185px;
+  }
+}
 </style>
 </head>
 <body>
 
-<!-- ------------------------- YÖNERGE KUTUSU ------------------------- -->
-<div id="instructionBox">
-    YÖNERGE:<br>
-    - EŞLE<br>
-    - AYNI OLANI EŞLE<br>
-    - <span id="dynamicInstruction"></span>
+<!-- ===================== ANA MENÜ ===================== -->
+<div id="menuScreen">
+  <div class="menu-container">
+      <div class="menu-title">🎯 NESNE EŞLEME OYUNU</div>
+      <div class="menu-sub">Bir eşleme modu seç ve oyuna başla!</div>
+
+      <button class="menu-btn" onclick="startGame(1)">1 Seçenekli Eşleme</button>
+      <button class="menu-btn" onclick="startGame(2)">2 Seçenekli Eşleme</button>
+      <button class="menu-btn" onclick="startGame(3)">3 Seçenekli Eşleme</button>
+      <button class="menu-btn" onclick="startGame(4)">4 Seçenekli Eşleme</button>
+      <button class="menu-btn" onclick="startGame(5)">5 Seçenekli Eşleme</button>
+      <button class="menu-btn" onclick="startGame(7)">7 Seçenekli Eşleme</button>
+  </div>
 </div>
 
-<!-- --------------------- 4 SEÇENEKLİ ÜST KARTLAR -------------------- -->
-<div class="option-row">
-    <div class="card" id="opt1"></div>
-    <div class="card" id="opt2"></div>
-    <div class="card" id="opt3"></div>
-    <div class="card" id="opt4"></div>
+
+<!-- ===================== OYUN EKRANI ===================== -->
+<div id="gameScreen">
+
+    <!-- Yönerge Kutusu -->
+    <div id="instructionBox">
+        <div class="title">YÖNERGE :</div>
+        <div class="line">Eşle</div>
+        <div class="line">Aynı olanı eşle</div>
+        <div id="dynamicInstruction" class="line">ELMAYI EŞLE</div>
+    </div>
+
+    <!-- Üst seçenek kartları -->
+    <div id="optionsRow"></div>
+
+    <!-- Çocuğun sürüklediği kart -->
+    <div id="dragCard" class="drag-card">
+        <div class="card-tr" id="dragTR"></div>
+        <img id="dragIMG" class="card-img">
+        <div class="card-en" id="dragEN"></div>
+    </div>
+
+    <!-- Sembol Barı (toplanacak yıldızlar) -->
+    <div id="symbolBar"></div>
+
+    <!-- Sembol Tahtası -->
+    <div id="symbolBoard">
+        <!-- 8 slot -->
+        <div class="slot" data-i="0"></div>
+        <div class="slot" data-i="1"></div>
+        <div class="slot" data-i="2"></div>
+        <div class="slot" data-i="3"></div>
+        <div class="slot" data-i="4"></div>
+        <div class="slot" data-i="5"></div>
+        <div class="slot" data-i="6"></div>
+        <div class="slot" data-i="7"></div>
+    </div>
+
+    <!-- Uçan yıldız animasyonu -->
+    <div id="flyStar">⭐</div>
+
+    <!-- Ses Aç/Kapat -->
+    <button id="toggleAudio" onclick="toggleAudio()">🔊 Ses Açık</button>
+
+    <!-- Geri dön -->
+    <button id="backToMenu" onclick="returnToMenu()">← Menü</button>
+
 </div>
-
-<!-- ----------------------- DRAG KARTI ------------------------------ -->
-<div class="card" id="dragCard"></div>
-
-<!-- ----------------------- SEMBOL BAR ------------------------------ -->
-<div id="symbolBar"></div>
-
-<!-- ---------------------- SEMBOL TAHTASI --------------------------- -->
-<div id="symbolBoard"></div>
-
-<!-- SES BUTONU -->
-<button id="soundBtn">🔊 Sesi Kapat</button>
-
 <script>
-/* ============================================================== */
-/*                   TÜM NESNE LİSTEMİZ (50 ADET)                 */
-/* ============================================================== */
+/* ============================================================
+   PİKA & BERK — ÇOK MODLU EŞLEME OYUN MOTORU
+   PARÇA 3A — Menü → Oyun geçişi + Nesne seti
+============================================================ */
 
-let items = [
-    // Meyveler
-    {name:"ELMA", eng:"apple", file:"elma.png"},
-    {name:"MUZ", eng:"banana", file:"muz.png"},
-    {name:"ARMUT", eng:"pear", file:"armut.png"},
-    {name:"ÜZÜM", eng:"grape", file:"uzum.png"},
-    {name:"ANANAS", eng:"pineapple", file:"ananas.png"},
-    {name:"ÇİLEK", eng:"strawberry", file:"cilek.png"},
-    {name:"KARPUZ", eng:"watermelon", file:"karpuz.png"},
-    {name:"KAVUN", eng:"melon", file:"kavun.png"},
-    {name:"PORTAKAL", eng:"orange", file:"portakal.png"},
-    {name:"KİVİ", eng:"kiwi", file:"kivi.png"},
+/* MENÜDEN OYUNA GEÇİŞ */
+let optionCount = 1;       // kaç seçenekli oyun
+let audioEnabled = true;   // ses açık/kapalı
+let currentTarget = null;  // hedef nesne
+let currentChoices = [];   // seçenek kartları
+let symbolsCollected = 0;  // kazanılan semboller (max 8)
 
-    // Sebzeler
-    {name:"DOMATES", eng:"tomato", file:"domates.png"},
-    {name:"SALATALIK", eng:"cucumber", file:"salatalik.png"},
-    {name:"BİBER", eng:"pepper", file:"biber.png"},
-    {name:"SARIMSAK", eng:"garlic", file:"sarimsak.png"},
-    {name:"SOĞAN", eng:"onion", file:"sogan.png"},
-    {name:"BROKOLİ", eng:"broccoli", file:"brokoli.png"},
-    {name:"HAVUÇ", eng:"carrot", file:"havuc.png"},
-    {name:"LAHANA", eng:"cabbage", file:"lahana.png"},
-    {name:"MISIR", eng:"corn", file:"misir.png"},
-    {name:"PATLICAN", eng:"eggplant", file:"patlican.png"},
+/* Menüden oyun ekranına geç */
+function startGame(n){
+    optionCount = n;
+    document.getElementById("menuScreen").style.display = "none";
+    document.getElementById("gameScreen").style.display = "block";
+    initializeGame();
+}
 
-    // Taşıtlar
-    {name:"ARABA", eng:"car", file:"araba.png"},
-    {name:"MOTOSİKLET", eng:"motorcycle", file:"motosiklet.png"},
-    {name:"BİSİKLET", eng:"bicycle", file:"bisiklet.png"},
-    {name:"GEMİ", eng:"ship", file:"gemi.png"},
-    {name:"HELIKOPTER", eng:"helicopter", file:"helikopter.png"},
-    {name:"UÇAK", eng:"plane", file:"ucak.png"},
-    {name:"TREN", eng:"train", file:"tren.png"},
-    {name:"OTOBÜS", eng:"bus", file:"otobus.png"},
-    {name:"İTFAİYE", eng:"firetruck", file:"itfaiye.png"},
-    {name:"KAMYON", eng:"truck", file:"kamyon.png"},
+/* Menüye geri dön */
+function returnToMenu(){
+    location.reload(); // en temiz yöntem
+}
 
-    // Hayvanlar
-    {name:"ASLAN", eng:"lion", file:"aslan.png"},
-    {name:"KÖPEK", eng:"dog", file:"kopek.png"},
-    {name:"KEDİ", eng:"cat", file:"kedi.png"},
-    {name:"TAVŞAN", eng:"rabbit", file:"tavsan.png"},
-    {name:"KUŞ", eng:"bird", file:"kus.png"},
-    {name:"AYI", eng:"bear", file:"ayi.png"},
-    {name:"KAPLAN", eng:"tiger", file:"kaplan.png"},
-    {name:"TİLKİ", eng:"fox", file:"tilki.png"},
-    {name:"KURBAĞA", eng:"frog", file:"kurbağa.png"},
-    {name:"YUNUS", eng:"dolphin", file:"yunus.png"},
+/* SES AÇ/KAPAT */
+function toggleAudio(){
+    audioEnabled = !audioEnabled;
+    const btn = document.getElementById("toggleAudio");
+    btn.textContent = audioEnabled ? "🔊 Ses Açık" : "🔇 Ses Kapalı";
+}
+
+/* ================= NESNE SETİ (Türkçe – İngilizce – Görsel) ================= */
+const items = [
+    {tr:"Elma", en:"Apple", img:"assets/elma.png"},
+    {tr:"Muz", en:"Banana", img:"assets/muz.png"},
+    {tr:"Armut", en:"Pear", img:"assets/armut.png"},
+    {tr:"Karpuz", en:"Watermelon", img:"assets/karpuz.png"},
+    {tr:"Üzüm", en:"Grapes", img:"assets/uzum.png"},
+    {tr:"Kavun", en:"Melon", img:"assets/kavun.png"},
+    {tr:"Portakal", en:"Orange", img:"assets/portakal.png"},
+    {tr:"Kivi", en:"Kiwi", img:"assets/kivi.png"},
+    {tr:"Çilek", en:"Strawberry", img:"assets/cilek.png"},
+    {tr:"Ananas", en:"Pineapple", img:"assets/ananas.png"},
+
+    {tr:"Domates", en:"Tomato", img:"assets/domates.png"},
+    {tr:"Salatalık", en:"Cucumber", img:"assets/salatalik.png"},
+    {tr:"Biber", en:"Pepper", img:"assets/biber.png"},
+    {tr:"Soğan", en:"Onion", img:"assets/sogan.png"},
+    {tr:"Sarımsak", en:"Garlic", img:"assets/sarimsak.png"},
+    {tr:"Brokoli", en:"Broccoli", img:"assets/brokoli.png"},
+    {tr:"Havuç", en:"Carrot", img:"assets/havuc.png"},
+    {tr:"Lahana", en:"Cabbage", img:"assets/lahana.png"},
+    {tr:"Mısır", en:"Corn", img:"assets/misir.png"},
+    {tr:"Patlıcan", en:"Eggplant", img:"assets/patlican.png"},
+
+    {tr:"Araba", en:"Car", img:"assets/araba.png"},
+    {tr:"Kamyon", en:"Truck", img:"assets/kamyon.png"},
+    {tr:"Otobüs", en:"Bus", img:"assets/otobus.png"},
+    {tr:"Gemi", en:"Ship", img:"assets/gemi.png"},
+    {tr:"Uçak", en:"Plane", img:"assets/ucak.png"},
+    {tr:"Helikopter", en:"Helicopter", img:"assets/helikopter.png"},
+    {tr:"Bisiklet", en:"Bicycle", img:"assets/bisiklet.png"},
+    {tr:"Motosiklet", en:"Motorcycle", img:"assets/motosiklet.png"},
+    {tr:"Tren", en:"Train", img:"assets/tren.png"},
+    {tr:"İtfaiye", en:"Firetruck", img:"assets/itfaiye.png"},
+
+    {tr:"Köpek", en:"Dog", img:"assets/kopek.png"},
+    {tr:"Kedi", en:"Cat", img:"assets/kedi.png"},
+    {tr:"Aslan", en:"Lion", img:"assets/aslan.png"},
+    {tr:"Kaplan", en:"Tiger", img:"assets/kaplan.png"},
+    {tr:"Ayı", en:"Bear", img:"assets/ayi.png"},
+    {tr:"Tavşan", en:"Rabbit", img:"assets/tavsan.png"},
+    {tr:"Koyun", en:"Sheep", img:"assets/koyun.png"},
+    {tr:"İnek", en:"Cow", img:"assets/inek.png"},
+    {tr:"At", en:"Horse", img:"assets/at.png"},
+    {tr:"Tavuk", en:"Chicken", img:"assets/tavuk.png"}
 ];
 
-/* ============================================================== */
-/*                    RANDOM SES CÜMLELERİ                         */
-/* ============================================================== */
+/* Rastgele karıştır */
+function shuffle(arr){
+    for(let i = arr.length -1; i > 0; i--){
+        const j = Math.floor(Math.random() * (i+1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+}
+<script>
+/* ============================================================
+   PİKA & BERK — ÇOK MODLU EŞLEME OYUN MOTORU
+   PARÇA 3A — Menü → Oyun geçişi + Nesne seti
+============================================================ */
 
-let praiseSounds = [
-    new Audio("aferin.mp3"),
-    new Audio("bravo.mp3"),
-    new Audio("supersin.mp3"),
-    new Audio("harika.mp3")
+/* MENÜDEN OYUNA GEÇİŞ */
+let optionCount = 1;       // kaç seçenekli oyun
+let audioEnabled = true;   // ses açık/kapalı
+let currentTarget = null;  // hedef nesne
+let currentChoices = [];   // seçenek kartları
+let symbolsCollected = 0;  // kazanılan semboller (max 8)
+
+/* Menüden oyun ekranına geç */
+function startGame(n){
+    optionCount = n;
+    document.getElementById("menuScreen").style.display = "none";
+    document.getElementById("gameScreen").style.display = "block";
+    initializeGame();
+}
+
+/* Menüye geri dön */
+function returnToMenu(){
+    location.reload(); // en temiz yöntem
+}
+
+/* SES AÇ/KAPAT */
+function toggleAudio(){
+    audioEnabled = !audioEnabled;
+    const btn = document.getElementById("toggleAudio");
+    btn.textContent = audioEnabled ? "🔊 Ses Açık" : "🔇 Ses Kapalı";
+}
+
+/* ================= NESNE SETİ (Türkçe – İngilizce – Görsel) ================= */
+const items = [
+    {tr:"Elma", en:"Apple", img:"assets/elma.png"},
+    {tr:"Muz", en:"Banana", img:"assets/muz.png"},
+    {tr:"Armut", en:"Pear", img:"assets/armut.png"},
+    {tr:"Karpuz", en:"Watermelon", img:"assets/karpuz.png"},
+    {tr:"Üzüm", en:"Grapes", img:"assets/uzum.png"},
+    {tr:"Kavun", en:"Melon", img:"assets/kavun.png"},
+    {tr:"Portakal", en:"Orange", img:"assets/portakal.png"},
+    {tr:"Kivi", en:"Kiwi", img:"assets/kivi.png"},
+    {tr:"Çilek", en:"Strawberry", img:"assets/cilek.png"},
+    {tr:"Ananas", en:"Pineapple", img:"assets/ananas.png"},
+
+    {tr:"Domates", en:"Tomato", img:"assets/domates.png"},
+    {tr:"Salatalık", en:"Cucumber", img:"assets/salatalik.png"},
+    {tr:"Biber", en:"Pepper", img:"assets/biber.png"},
+    {tr:"Soğan", en:"Onion", img:"assets/sogan.png"},
+    {tr:"Sarımsak", en:"Garlic", img:"assets/sarimsak.png"},
+    {tr:"Brokoli", en:"Broccoli", img:"assets/brokoli.png"},
+    {tr:"Havuç", en:"Carrot", img:"assets/havuc.png"},
+    {tr:"Lahana", en:"Cabbage", img:"assets/lahana.png"},
+    {tr:"Mısır", en:"Corn", img:"assets/misir.png"},
+    {tr:"Patlıcan", en:"Eggplant", img:"assets/patlican.png"},
+
+    {tr:"Araba", en:"Car", img:"assets/araba.png"},
+    {tr:"Kamyon", en:"Truck", img:"assets/kamyon.png"},
+    {tr:"Otobüs", en:"Bus", img:"assets/otobus.png"},
+    {tr:"Gemi", en:"Ship", img:"assets/gemi.png"},
+    {tr:"Uçak", en:"Plane", img:"assets/ucak.png"},
+    {tr:"Helikopter", en:"Helicopter", img:"assets/helikopter.png"},
+    {tr:"Bisiklet", en:"Bicycle", img:"assets/bisiklet.png"},
+    {tr:"Motosiklet", en:"Motorcycle", img:"assets/motosiklet.png"},
+    {tr:"Tren", en:"Train", img:"assets/tren.png"},
+    {tr:"İtfaiye", en:"Firetruck", img:"assets/itfaiye.png"},
+
+    {tr:"Köpek", en:"Dog", img:"assets/kopek.png"},
+    {tr:"Kedi", en:"Cat", img:"assets/kedi.png"},
+    {tr:"Aslan", en:"Lion", img:"assets/aslan.png"},
+    {tr:"Kaplan", en:"Tiger", img:"assets/kaplan.png"},
+    {tr:"Ayı", en:"Bear", img:"assets/ayi.png"},
+    {tr:"Tavşan", en:"Rabbit", img:"assets/tavsan.png"},
+    {tr:"Koyun", en:"Sheep", img:"assets/koyun.png"},
+    {tr:"İnek", en:"Cow", img:"assets/inek.png"},
+    {tr:"At", en:"Horse", img:"assets/at.png"},
+    {tr:"Tavuk", en:"Chicken", img:"assets/tavuk.png"}
 ];
 
-let countSounds = [
-    new Audio("1.mp3"), new Audio("2.mp3"), new Audio("3.mp3"),
-    new Audio("4.mp3"), new Audio("5.mp3"), new Audio("6.mp3"),
-    new Audio("7.mp3"), new Audio("8.mp3")
-];
+/* Rastgele karıştır */
+function shuffle(arr){
+    for(let i = arr.length -1; i > 0; i--){
+        const j = Math.floor(Math.random() * (i+1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+}
+/* ============================================================
+   PARÇA 3C — DRAG & DROP, SEMBOL SİSTEMİ, ANİMASYON, SESLER
+============================================================ */
 
-let finishSound = new Audio("finish.mp3");
+/* ===================== SÜRÜKLE-BIRAK ===================== */
 
-let soundEnabled = true;
+let dragging = false;
+let offsetX = 0;
+let offsetY = 0;
 
-/* ============================================================== */
-/*                       SESSİZ BUTONU                             */
-/* ============================================================== */
-
-document.getElementById("soundBtn").onclick = () => {
-    soundEnabled = !soundEnabled;
-    document.getElementById("soundBtn").innerText = 
-        soundEnabled ? "🔊 Sesi Kapat" : "🔇 Sesi Aç";
-};
-
-/* ============================================================== */
-/*                     OYUN MEKANİĞİ                              */
-/* ============================================================== */
-
-let symbolCount = 8;
-let earned = 0;
-
-const bar = document.getElementById("symbolBar");
-const board = document.getElementById("symbolBoard");
 const dragCard = document.getElementById("dragCard");
-
-function refreshSymbolBar() {
-    bar.innerHTML = "⭐".repeat(symbolCount - earned);
-}
-refreshSymbolBar();
-
-/* ------------------------------------------------------------- */
-/*                   KARTLARI RENDER ETME                        */
-/* ------------------------------------------------------------- */
-
-let currentItem = null;
-
-function newRound() {
-    let options = [...items];
-    let correct = options[Math.floor(Math.random()*options.length)];
-    currentItem = correct;
-
-    document.getElementById("dynamicInstruction").innerText =
-        correct.name + "YI EŞLE";
-
-    let wrongs = options.filter(x => x !== correct);
-    wrongs = wrongs.sort(() => Math.random()-0.5).slice(0,3);
-    let four = [...wrongs, correct].sort(() => Math.random()-0.5);
-
-    loadCard("opt1", four[0]);
-    loadCard("opt2", four[1]);
-    loadCard("opt3", four[2]);
-    loadCard("opt4", four[3]);
-
-    loadCard("dragCard", correct);
-}
-
-function loadCard(id, obj) {
-    const el = document.getElementById(id);
-    el.innerHTML = `
-        <div class="turkishName">${obj.name}</div>
-        <img src="assets/${obj.file}">
-        <div class="englishName">${obj.eng}</div>
-    `;
-}
-
-newRound();
-
-/* ------------------------------------------------------------- */
-/*                    DRAG & DROP                                */
-/* ------------------------------------------------------------- */
-
-let offsetX=0, offsetY=0;
 
 dragCard.addEventListener("mousedown", startDrag);
 document.addEventListener("mouseup", stopDrag);
 document.addEventListener("mousemove", dragMove);
 
-let dragging = false;
-
 function startDrag(e){
     dragging = true;
+    dragCard.style.transition = "";
     offsetX = e.clientX - dragCard.offsetLeft;
     offsetY = e.clientY - dragCard.offsetTop;
 }
 
 function stopDrag(){
-    if (!dragging) return;
+    if(!dragging) return;
     dragging = false;
 
-    checkMatch();
+    checkDropTarget();
 }
 
 function dragMove(e){
-    if (!dragging) return;
+    if(!dragging) return;
+
     dragCard.style.left = (e.clientX - offsetX) + "px";
-    dragCard.style.top = (e.clientY - offsetY) + "px";
+    dragCard.style.top  = (e.clientY - offsetY) + "px";
 }
 
-/* ------------------------------------------------------------- */
-/*                     EŞLEME KONTROLÜ                           */
-/* ------------------------------------------------------------- */
+/* Sürüklenen kart, seçeneklerden birine temas ediyor mu? */
+function checkDropTarget(){
+    let options = [...document.querySelectorAll(".option-card")];
 
-function checkMatch() {
-    const optCards = ["opt1","opt2","opt3","opt4"];
+    let d = dragCard.getBoundingClientRect();
 
-    for (let id of optCards) {
-        let box = document.getElementById(id).getBoundingClientRect();
-        let drag = dragCard.getBoundingClientRect();
+    for(let opt of options){
+        let b = opt.getBoundingClientRect();
 
-        if (!(drag.right < box.left || 
-              drag.left > box.right ||
-              drag.bottom < box.top ||
-              drag.top > box.bottom)) {
+        if( !(d.right < b.left || d.left > b.right || d.bottom < b.top || d.top > b.bottom) ){
+            // temas var
+            let chosen = opt.dataset.tr;
+            let target = currentTarget.tr;
 
-            let chosen = document.querySelector(`#${id} .turkishName`).innerText.trim();
-
-            if (chosen === currentItem.name) handleCorrect();
-            else handleWrong();
-
+            if(chosen === target){
+                opt.classList.add("correct");
+                setTimeout(()=> opt.classList.remove("correct"),400);
+                giveSymbol();
+                setTimeout(()=>{
+                    resetDragPosition();
+                    createNewRound();
+                },600);
+            } else {
+                opt.classList.add("wrong");
+                setTimeout(()=> opt.classList.remove("wrong"),400);
+                resetDragPosition();
+            }
             return;
         }
     }
 
+    // hiçbir karta temas yoksa geri dönsün
     resetDragPosition();
 }
 
-function handleCorrect() {
-    if (soundEnabled) {
-        let s = praiseSounds[Math.floor(Math.random()*praiseSounds.length)];
-        s.play();
-    }
-
-    earned++;
-
-    animateStar();
-
-    if (earned >= symbolCount) setTimeout(countSymbols, 1000);
-    else setTimeout(() => newRound(), 600);
-
-    resetDragPosition();
-}
-
-function handleWrong() {
+function resetDragPosition(){
     dragCard.style.transition = "0.3s";
-    dragCard.style.background = "#ffb3b3";
-    setTimeout(() => {
-        dragCard.style.background = "#fff";
-        dragCard.style.transition = "";
-        resetDragPosition();
-    }, 400);
-}
-
-function resetDragPosition() {
     dragCard.style.left = "50%";
-    dragCard.style.top = "360px";
+    dragCard.style.top  = "80%";
     dragCard.style.transform = "translateX(-50%)";
 }
 
-/* ------------------------------------------------------------- */
-/*                   SEMBOL ANİMASYONU                          */
-/* ------------------------------------------------------------- */
 
-function animateStar() {
-    const star = document.createElement("div");
-    star.innerText = "⭐";
-    star.style.position = "absolute";
-    star.style.left = (window.innerWidth/2 - 20) + "px";
-    star.style.top = "300px";
-    star.style.fontSize = "40px";
-    star.style.transition = "1s ease";
-    document.body.appendChild(star);
+/* ===================== SES SİSTEMİ ===================== */
 
-    setTimeout(()=>{
-        star.style.left = (window.innerWidth - 170) + "px";
-        star.style.top = (window.innerHeight - 130) + "px";
-    }, 100);
+const praiseSounds = [
+    new Audio("ses/aferin.mp3"),
+    new Audio("ses/bravo.mp3"),
+    new Audio("ses/supersin.mp3"),
+    new Audio("ses/harika.mp3")
+];
 
-    setTimeout(()=>{
-        star.remove();
-        refreshSymbolBar();
-    }, 1100);
+const countSounds = [
+    new Audio("ses/1.mp3"),
+    new Audio("ses/2.mp3"),
+    new Audio("ses/3.mp3"),
+    new Audio("ses/4.mp3"),
+    new Audio("ses/5.mp3"),
+    new Audio("ses/6.mp3"),
+    new Audio("ses/7.mp3"),
+    new Audio("ses/8.mp3")
+];
+
+const finishSound = new Audio("ses/finish.mp3");
+
+function playPraise(){
+    if(!audioEnabled) return;
+    let s = praiseSounds[Math.floor(Math.random() * praiseSounds.length)];
+    s.play();
 }
 
-/* ------------------------------------------------------------- */
-/*                 SEMBOLLARI SAYMA (BİTİŞ)                      */
-/* ------------------------------------------------------------- */
 
-function countSymbols() {
-    let seq = 0;
+/* ===================== SEMBOL SİSTEMİ ===================== */
+
+function fillSymbolBar(){
+    const bar = document.getElementById("symbolBar");
+    bar.innerHTML = "";
+    for(let i=0; i<8; i++){
+        let d = document.createElement("div");
+        d.className = "bar-slot empty";
+        d.dataset.index = i;
+        bar.appendChild(d);
+    }
+}
+
+function markSymbolOnBar(i){
+    let slot = document.querySelector(`.bar-slot[data-index='${i}']`);
+    slot.classList.remove("empty");
+    slot.textContent = "⭐";
+}
+
+
+/* ===================== UÇAN YILDIZ ANİMASYONU ===================== */
+
+function animateStar(index){
+    const star = document.getElementById("flyStar");
+    const board = document.getElementById("symbolBoard");
+    const slot = document.querySelector(`.slot[data-i='${index}']`);
+
+    // animasyon başlangıcı
+    star.style.opacity = "1";
+    star.style.transform = "translate(-50%, -50%) scale(1)";
+
+    setTimeout(()=>{
+        let rect = slot.getBoundingClientRect();
+        star.style.left = rect.left + "px";
+        star.style.top  = rect.top  + "px";
+        star.style.transform = "scale(.1)";
+        star.style.opacity = "0";
+    }, 150);
+}
+
+
+/* ===================== SEMBOL KAZANMA ===================== */
+
+function giveSymbol(){
+    playPraise();
+    animateStar(symbolsCollected);
+
+    // tahtada yıldızı aktif et
+    let slot = document.querySelector(`.slot[data-i='${symbolsCollected}']`);
+    slot.classList.add("active");
+    slot.textContent = "⭐";
+
+    // bar üzerinde de göster
+    markSymbolOnBar(symbolsCollected);
+
+    symbolsCollected++;
+
+    if(symbolsCollected === 8){
+        setTimeout(()=> countSymbols(), 900);
+    }
+}
+
+
+/* ===================== SEMBOL SAYMA SİSTEMİ ===================== */
+
+function countSymbols(){
+    if(!audioEnabled){
+        finishAndRestart();
+        return;
+    }
+
+    let i = 0;
+
     function sayNext(){
-        if (seq < 8) {
-            soundEnabled && countSounds[seq].play();
-            seq++;
-            setTimeout(sayNext, 900);
+        if(i < 8){
+            countSounds[i].play();
+            i++;
+            setTimeout(()=> sayNext(), 900);
         } else {
-            soundEnabled && finishSound.play();
-            setTimeout(()=>{
-                earned = 0;
-                refreshSymbolBar();
-                newRound();
-            }, 1500);
+            finishSound.play();
+            setTimeout(()=> finishAndRestart(), 1500);
         }
     }
+
     sayNext();
 }
 
-</script>
+function finishAndRestart(){
+    symbolsCollected = 0;
+    fillSymbolBar();
 
-</body>
+    // tahtayı temizle
+    document.querySelectorAll(".slot").forEach(s=>{
+        s.classList.remove("active");
+        s.textContent = "";
+    });
+
+    // yeni oyuna başla
+    createNewRound();
+}
+
+
+/* ===================== TAHTADAN SEMBOL GERİ ALMA — (İsteğe bağlı) ===================== */
+/* Sembol tahtasındaki yıldızlara tıklayınca “söktürme + saydırma modu”  */
+
+document.querySelectorAll(".slot").forEach(slot=>{
+    slot.addEventListener("click", ()=>{
+        if(!slot.classList.contains("active")) return;
+
+        let index = parseInt(slot.dataset.i);
+        slot.classList.remove("active");
+        slot.textContent = "";
+
+        // bar'da da kaldır
+        let barSlot = document.querySelector(`.bar-slot[data-index='${index}']`);
+        barSlot.classList.add("empty");
+        barSlot.textContent = "";
+
+        symbolsCollected--;
+
+        if(audioEnabled && countSounds[index]){
+            countSounds[index].play();
+        }
+    });
+});
+
+</script>
 </html>
