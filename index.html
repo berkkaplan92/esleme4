@@ -1,0 +1,346 @@
+<!DOCTYPE html><html lang="tr"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Pika & Berk – V24 FULL (4 Seçenek)</title>
+<style>
+:root{--card-w:170px;--card-h:220px;}
+*{box-sizing:border-box} body{margin:0;height:100vh;overflow:hidden;
+background:linear-gradient(to bottom right,#b3e5fc,#e1f5fe);
+font-family:"Comic Sans MS",system-ui,sans-serif}
+
+/* Yönerge kutusu */
+#instructionBox{position:absolute;top:40px;left:40px;background:#e3f2fd;
+border:3px solid #2196f3;border-radius:14px;padding:10px 14px;
+box-shadow:0 3px 8px rgba(0,0,0,.12);z-index:20;color:#0d47a1}
+#instructionBox .title{font-weight:700;margin-bottom:4px}
+#instructionBox .line{font-weight:700;font-size:13px;text-transform:uppercase;margin:1px 0}
+
+/* Üstteki 4 seçenek */
+.option-card{width:var(--card-w);height:var(--card-h);background:#fff;
+border:3px solid rgba(11,132,165,.4);border-radius:16px;
+box-shadow:0 4px 10px rgba(0,0,0,.15);position:absolute;
+display:flex;flex-direction:column;align-items:center;padding:6px 8px;user-select:none;z-index:10}
+.card-tr{margin-top:2px;font-weight:800;text-transform:uppercase;font-size:14px}
+.card-img{width:120px;height:120px;object-fit:contain;margin:6px 0}
+.card-en{font-size:12px;font-style:italic;opacity:.85}
+
+#option1{top:6%;left:10%}
+#option2{top:6%;left:35%}
+#option3{top:6%;left:60%}
+#option4{top:6%;left:85%;transform:translateX(-100%)}
+
+/* Sürüklenen kart */
+#dragCard{width:var(--card-w);height:var(--card-h);background:#fff;
+border:3px solid rgba(11,132,165,.6);border-radius:16px;
+box-shadow:0 6px 10px rgba(0,0,0,.35);position:absolute;
+bottom:7%;left:50%;transform:translateX(-50%);
+display:flex;flex-direction:column;align-items:center;padding:6px 8px;
+cursor:grab;user-select:none;touch-action:none;z-index:200}
+.correct{border-color:#2ecc71!important;box-shadow:0 0 18px rgba(46,204,113,.9)!important}
+.wrong{border-color:#e74c3c!important;box-shadow:0 0 18px rgba(231,76,60,.9)!important}
+
+/* Sembol barı */
+#symbolBar{position:absolute;bottom:2%;left:50%;transform:translateX(-50%);
+display:flex;gap:6px;background:rgba(255,255,255,.6);
+padding:6px 10px;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,.15);z-index:999}
+.bar-slot{width:22px;height:22px;border-radius:6px;background:#fff;
+display:flex;align-items:center;justify-content:center;font-size:16px;
+transition:opacity .25s,transform .25s}
+.bar-slot.empty{opacity:.25;transform:scale(.9)}
+
+/* Sembol tahtası */
+#symbolBoard{position:absolute;bottom:20px;right:20px;width:270px;height:120px;
+background:url('https://cdn.pixabay.com/photo/2014/04/02/10/56/wood-306955_1280.png')center/cover no-repeat;
+border-radius:16px;padding:10px;display:flex;flex-wrap:wrap;
+gap:6px;justify-content:center;align-items:center;box-shadow:0 4px 10px rgba(0,0,0,.25)}
+.slot{width:30px;height:30px;background:rgba(255,255,255,.25);
+border-radius:8px;text-align:center;line-height:30px;font-size:22px;
+opacity:.25;cursor:pointer;transition:.25s}
+.slot.active{opacity:1;transform:scale(1.06)}
+
+/* Uçan yıldız */
+#flyStar{position:absolute;width:40px;height:40px;background:gold;border-radius:50%;
+box-shadow:0 0 12px rgba(255,215,0,.9);top:50%;left:50%;
+transform:translate(-50%,-50%) scale(0);opacity:0;transition:.35s;z-index:2000}
+
+/* Ses butonu */
+#toggleAudio{position:fixed;right:20px;bottom:20px;
+background:#1976d2;color:#fff;border:0;padding:10px 14px;
+font-weight:700;border-radius:24px;cursor:pointer;z-index:2500}
+</style>
+</head>
+<body>
+
+<!-- YÖNERGE -->
+<div id="instructionBox">
+<div class="title">YÖNERGE :</div>
+<div class="line">- EŞLE</div>
+<div class="line">- AYNI OLANI EŞLE</div>
+<div class="line" id="line3">- NESNEYİ EŞLE</div>
+</div>
+
+<!-- 4 SEÇENEK -->
+<div class="option-card" id="option1"><div class="card-tr" id="tr1"></div><img class="card-img" id="img1"><div class="card-en" id="en1"></div></div>
+<div class="option-card" id="option2"><div class="card-tr" id="tr2"></div><img class="card-img" id="img2"><div class="card-en" id="en2"></div></div>
+<div class="option-card" id="option3"><div class="card-tr" id="tr3"></div><img class="card-img" id="img3"><div class="card-en" id="en3"></div></div>
+<div class="option-card" id="option4"><div class="card-tr" id="tr4"></div><img class="card-img" id="img4"><div class="card-en" id="en4"></div></div>
+
+<!-- SÜRÜKLENEN -->
+<div id="dragCard"><div class="card-tr" id="dragTr"></div><img class="card-img" id="dragImg"><div class="card-en" id="dragEn"></div></div>
+
+<!-- SEMBOL BAR -->
+<div id="symbolBar">
+<div class="bar-slot" id="b1">⭐</div><div class="bar-slot" id="b2">⭐</div>
+<div class="bar-slot" id="b3">⭐</div><div class="bar-slot" id="b4">⭐</div>
+<div class="bar-slot" id="b5">⭐</div><div class="bar-slot" id="b6">⭐</div>
+<div class="bar-slot" id="b7">⭐</div><div class="bar-slot" id="b8">⭐</div>
+</div>
+
+<!-- SEMBOL TAHTASI -->
+<div id="symbolBoard">
+<div class="slot" id="s1"></div><div class="slot" id="s2"></div>
+<div class="slot" id="s3"></div><div class="slot" id="s4"></div>
+<div class="slot" id="s5"></div><div class="slot" id="s6"></div>
+<div class="slot" id="s7"></div><div class="slot" id="s8"></div>
+</div>
+
+<div id="flyStar"></div>
+<button id="toggleAudio">🔊 Sesi Aç</button>
+
+<script>
+/* ====================== SES TOGGLE ======================= */
+let audioEnabled=false;
+toggleAudio.onclick=()=>{audioEnabled=!audioEnabled;toggleAudio.textContent=audioEnabled?"🔇 Sesi Kapat":"🔊 Sesi Aç";};
+
+/* ====================== DOĞAL SESLER (TTS) ======================= */
+function speak(text){
+ if(!audioEnabled) return;
+ const u=new SpeechSynthesisUtterance(text);
+ u.lang="tr-TR"; speechSynthesis.speak(u);
+}
+
+/* ====================== VERİ SETİ (50 NESNE) ======================= */
+const ITEMS=[
+{id:"elma",tr:"Elma",en:"Apple"},{id:"muz",tr:"Muz",en:"Banana"},
+{id:"armut",tr:"Armut",en:"Pear"},{id:"uzum",tr:"Üzüm",en:"Grapes"},
+{id:"ananas",tr:"Ananas",en:"Pineapple"},{id:"cilek",tr:"Çilek",en:"Strawberry"},
+{id:"karpuz",tr:"Karpuz",en:"Watermelon"},{id:"kavun",tr:"Kavun",en:"Melon"},
+{id:"portakal",tr:"Portakal",en:"Orange"},{id:"kivi",tr:"Kivi",en:"Kiwi"},
+{id:"domates",tr:"Domates",en:"Tomato"},{id:"salatalik",tr:"Salatalık",en:"Cucumber"},
+{id:"biber",tr:"Biber",en:"Pepper"},{id:"sarimsak",tr:"Sarımsak",en:"Garlic"},
+{id:"sogan",tr:"Soğan",en:"Onion"},{id:"brokoli",tr:"Brokoli",en:"Broccoli"},
+{id:"havuc",tr:"Havuç",en:"Carrot"},{id:"lahana",tr:"Lahana",en:"Cabbage"},
+{id:"misir",tr:"Mısır",en:"Corn"},{id:"patlican",tr:"Patlıcan",en:"Eggplant"},
+{id:"kamyon",tr:"Kamyon",en:"Truck"},{id:"araba",tr:"Araba",en:"Car"},
+{id:"motosiklet",tr:"Motosiklet",en:"Motorcycle"},{id:"bisiklet",tr:"Bisiklet",en:"Bicycle"},
+{id:"gemi",tr:"Gemi",en:"Ship"},{id:"helikopter",tr:"Helikopter",en:"Helicopter"},
+{id:"ucak",tr:"Uçak",en:"Plane"},{id:"tren",tr:"Tren",en:"Train"},
+{id:"otobus",tr:"Otobüs",en:"Bus"},{id:"itfaiye_arabasi",tr:"İtfaiye Arabası",en:"Fire Truck"},
+{id:"aslan",tr:"Aslan",en:"Lion"},{id:"kaplan",tr:"Kaplan",en:"Tiger"},
+{id:"kedi",tr:"Kedi",en:"Cat"},{id:"kopek",tr:"Köpek",en:"Dog"},
+{id:"inek",tr:"İnek",en:"Cow"},{id:"at",tr:"At",en:"Horse"},
+{id:"koyun",tr:"Koyun",en:"Sheep"},{id:"keci",tr:"Keçi",en:"Goat"},
+{id:"tavuk",tr:"Tavuk",en:"Chicken"},{id:"ordek",tr:"Ördek",en:"Duck"},
+{id:"kus",tr:"Kuş",en:"Bird"},{id:"tavsan",tr:"Tavşan",en:"Rabbit"},
+{id:"balik",tr:"Balık",en:"Fish"},{id:"fil",tr:"Fil",en:"Elephant"},
+{id:"ayi",tr:"Ayı",en:"Bear"},{id:"maymun",tr:"Maymun",en:"Monkey"},
+{id:"kurbaga",tr:"Kurbağa",en:"Frog"},{id:"kaplumbaga",tr:"Kaplumbağa",en:"Turtle"},
+{id:"domuz",tr:"Domuz",en:"Pig"},{id:"yunus",tr:"Yunus",en:"Dolphin"},
+];
+
+/* ====================== YARDIMCI ======================= */
+const $=id=>document.getElementById(id);
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a;}
+function toAcc(word){
+ const v="aıoueiöü"; const low=word.toLowerCase("tr");
+ const lastV=(low.match(/[aıoueöü]/g)||["a"]).slice(-1)[0];
+ let ek="ı"; if(["e","i","ö","ü"].includes(lastV)) ek="i";
+ if(["o","u"].includes(lastV)) ek="u"; if(["ö","ü"].includes(lastV)) ek="ü";
+ return low.endsWith("k")?word.slice(0,-1)+"ğ"+ek:word+ek;
+}
+
+/* ====================== KART YERLEŞTİR ======================= */
+function fill(tr,img,en,item){
+ tr.textContent=item.tr.toUpperCase();
+ img.src="./assets/"+item.id+".png";
+ en.textContent=item.en.toLowerCase();
+ img.dataset.id=item.id;
+}
+
+let current,wrong1,wrong2,wrong3,attempt;
+
+/* ====================== NEW QUESTION ======================= */
+function newQ(){
+ current=ITEMS[Math.floor(Math.random()*ITEMS.length)];
+ do{wrong1=ITEMS[Math.floor(Math.random()*ITEMS.length)]}while(wrong1.id===current.id);
+ do{wrong2=ITEMS[Math.floor(Math.random()*ITEMS.length)]}while(wrong2.id===current.id||wrong2.id===wrong1.id);
+ do{wrong3=ITEMS[Math.floor(Math.random()*ITEMS.length)]}while(wrong3.id===current.id||wrong3.id===wrong1.id||wrong3.id===wrong2.id);
+
+ const arr=shuffle([current,wrong1,wrong2,wrong3]);
+
+ fill(tr1,img1,en1,arr[0]);
+ fill(tr2,img2,en2,arr[1]);
+ fill(tr3,img3,en3,arr[2]);
+ fill(tr4,img4,en4,arr[3]);
+
+ dragTr.textContent=current.tr.toUpperCase();
+ dragImg.src="./assets/"+current.id+".png";
+ dragEn.textContent=current.en.toLowerCase();
+
+ $("line3").textContent="- "+toAcc(current.tr).toUpperCase()+" EŞLE";
+
+ attempt=1;
+ resetDrag();
+}
+
+/* ====================== DRAG ======================= */
+let isDrag=false,startX,startY,sl,st;
+dragCard.onmousedown=start; dragCard.ontouchstart=start;
+function start(e){
+ e.preventDefault(); isDrag=true;
+ const p=e.touches?e.touches[0]:e;
+ startX=p.clientX; startY=p.clientY;
+ const r=dragCard.getBoundingClientRect(); sl=r.left; st=r.top;
+ dragCard.style.transition="none"; dragCard.style.cursor="grabbing";
+
+ document.onmousemove=move; document.onmouseup=end;
+ document.ontouchmove=move; document.ontouchend=end;
+}
+function move(e){
+ if(!isDrag)return;
+ const p=e.touches?e.touches[0]:e;
+ dragCard.style.left=(sl+p.clientX-startX)+"px";
+ dragCard.style.top=(st+p.clientY-startY)+"px";
+ dragCard.style.transform="none";
+}
+function end(){
+ if(!isDrag)return; isDrag=false; dragCard.style.cursor="grab";
+ document.onmousemove=null; document.onmouseup=null;
+ document.ontouchmove=null; document.ontouchend=null;
+ checkHit();
+}
+function resetDrag(){
+ dragCard.style.transition="all .25s";
+ dragCard.style.left="50%"; dragCard.style.bottom="7%";
+ dragCard.style.top=""; dragCard.style.transform="translateX(-50%)";
+}
+
+/* ====================== HİT TEST ======================= */
+function checkHit(){
+ const d=dragCard.getBoundingClientRect();
+ const ops=[
+  {el:option1,id:img1.dataset.id},
+  {el:option2,id:img2.dataset.id},
+  {el:option3,id:img3.dataset.id},
+  {el:option4,id:img4.dataset.id},
+ ];
+ let hit=null;
+ for(const o of ops){
+  const r=o.el.getBoundingClientRect();
+  const ok=!(d.right<r.left||d.left>r.right||d.bottom<r.top||d.top>r.bottom);
+  if(ok){hit=o.id;break;}
+ }
+ if(hit){
+  if(hit===current.id) correct();
+  else wrong();
+ } else resetDrag();
+}
+
+/* ====================== DOĞRU ======================= */
+function correct(){
+ dragCard.classList.add("correct");
+ speak(randomPraise());
+ gainSymbol();
+ if(attempt===1){
+  setTimeout(()=>{dragCard.classList.remove("correct");shuffle4();attempt=2;resetDrag()},450);
+ } else {
+  setTimeout(()=>{dragCard.classList.remove("correct");newQ()},450);
+ }
+}
+function randomPraise(){
+ const arr=["Aferin","Harika gidiyorsun","Süpersin","Bravo"];
+ return arr[Math.floor(Math.random()*arr.length)];
+}
+
+/* ====================== YANLIŞ ======================= */
+function wrong(){
+ dragCard.classList.add("wrong");
+ speak("yanlış");
+ setTimeout(()=>{dragCard.classList.remove("wrong");resetDrag()},450);
+}
+
+/* ====================== 4 KART KARIŞTIR ======================= */
+function shuffle4(){
+ const pack=[
+  {img:img1,tr:tr1,en:en1},
+  {img:img2,tr:tr2,en:en2},
+  {img:img3,tr:tr3,en:en3},
+  {img:img4,tr:tr4,en:en4},
+ ];
+ const old=pack.map(p=>({src:p.img.src,id:p.img.dataset.id,tr:p.tr.textContent,en:p.en.textContent}));
+ shuffle(old);
+ for(let i=0;i<4;i++){
+  pack[i].img.src=old[i].src; pack[i].img.dataset.id=old[i].id;
+  pack[i].tr.textContent=old[i].tr; pack[i].en.textContent=old[i].en;
+ }
+}
+
+/* ====================== SEMBOL SİSTEMİ ======================= */
+let boardCount=0,counting=false,counted=0;
+const bar=[b1,b2,b3,b4,b5,b6,b7,b8];
+const slots=[s1,s2,s3,s4,s5,s6,s7,s8];
+
+function firstFilled(){return bar.findIndex(x=>!x.classList.contains("empty"))}
+function firstEmpty(){return bar.findIndex(x=>x.classList.contains("empty"))}
+
+function gainSymbol(){
+ if(counting)return;
+ const i=firstFilled(); if(i!==-1) bar[i].classList.add("empty");
+ // yıldız animasyonu
+ flyStar.style.top="65%";flyStar.style.left="50%";
+ flyStar.style.opacity=1;flyStar.style.transform="translate(-50%,-50%) scale(1)";
+ setTimeout(()=>{
+  flyStar.style.top="82%";flyStar.style.left="90%";
+  flyStar.style.opacity=0;flyStar.style.transform="translate(-50%,-50%) scale(.3)";
+ },80);
+
+ setTimeout(()=>{
+  if(boardCount<8){
+   slots[boardCount].textContent="⭐";
+   slots[boardCount].classList.add("active");
+   boardCount++;
+   if(boardCount===8){
+    setTimeout(()=>{speak("Hadi sembolleri sayalım");counting=true;counted=0;},600);
+   }
+  }
+ },350);
+}
+
+slots.forEach((slot,i)=>{
+ slot.onclick=()=>{
+  if(!counting)return;
+  if(!slot.classList.contains("active"))return;
+  slot.classList.remove("active"); slot.textContent="";
+  boardCount--; counted++;
+  const nums=["bir","iki","üç","dört","beş","altı","yedi","sekiz"];
+  speak(nums[counted-1]);
+  bar[firstEmpty()]?.classList.remove("empty");
+  if(counted===8){
+   setTimeout(()=>{
+    speak("Aferin tüm sembolleri topladın");
+    boardCount=0; counted=0; counting=false;
+    bar.forEach(s=>s.classList.remove("empty"));
+    slots.forEach(s=>{s.classList.remove("active");s.textContent="";});
+    newQ();
+   },600);
+  }
+ };
+});
+
+/* ====================== START ======================= */
+window.onload=()=>{
+ bar.forEach(s=>s.classList.remove("empty"));
+ newQ();
+};
+</script>
+</body>
+</html>
