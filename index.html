@@ -218,7 +218,21 @@ body {
 
 
 <!-- ===================== MENÜ ===================== -->
+<script>
+function startGame(mode) {
+    window.selectedMode = mode;
 
+    // menüyü kapat, oyunu aç
+    document.getElementById("menu").style.display = "none";
+    document.getElementById("gameArea").style.display = "block";
+
+    // sembolleri sıfırla
+    if (typeof resetSymbols === "function") resetSymbols();
+
+    // yeni tur başlat
+    if (typeof createNewRound === "function") createNewRound();
+}
+</script>
 <div id="menu">
     <div class="menu-title">Nesne Eşleme</div>
 
