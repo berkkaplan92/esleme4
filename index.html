@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <title>Nesne Eşleme Oyunu - V25</title>
+  <title>Nesne Eşleme Oyunu - V25.1</title>
   <style>
     * {
       box-sizing: border-box;
@@ -76,7 +76,6 @@
       cursor: pointer;
       font-size: 16px;
       font-weight: 600;
-      /* MAVİ DEGRADE */
       background: linear-gradient(135deg, #4da3ff, #6cc6ff);
       color: #fff;
       box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
@@ -225,7 +224,7 @@
 
     #optionsRow {
       position: absolute;
-      top: 80px; /* daha yukarı */
+      top: 80px; /* üst kartlar */
       left: 50%;
       transform: translateX(-50%);
       display: flex;
@@ -237,7 +236,7 @@
 
     #dragArea {
       position: absolute;
-      top: 360px; /* daha aşağı, arada alan var */
+      top: 380px; /* sürüklenen kart biraz daha aşağıda */
       left: 50%;
       transform: translateX(-50%);
       z-index: 2;
@@ -304,7 +303,7 @@
 
     #symbolsWrapper {
       position: absolute;
-      bottom: 12px; /* daha aşağı */
+      bottom: 6px; /* biraz daha aşağıya çekildi */
       left: 50%;
       transform: translateX(-50%);
       display: flex;
@@ -328,7 +327,7 @@
       position: absolute;
       right: 40px;
       bottom: 30px;
-      width: 260px; /* 8 yıldız için geniş */
+      width: 320px; /* 8 yıldız için biraz daha geniş */
       height: 80px;
       border-radius: 16px;
       background: rgba(255, 255, 255, 0.5);
@@ -378,8 +377,6 @@
       z-index: 999;
       transition: transform 0.55s ease, opacity 0.55s ease;
     }
-
-    /* Küçük responsive dokunuş */
 
     @media (max-width: 900px) {
       #optionsRow {
@@ -519,7 +516,7 @@
       { id: "ucak", tr: "UÇAK", en: "Airplane" },
       { id: "tren", tr: "TREN", en: "Train" },
       { id: "otobus", tr: "OTOBÜS", en: "Bus" },
-      { id: "itfaiye", tr: "İTFAİYE", en: "Fire Truck" },
+      { id: "itfaiye_arabasi", tr: "İTFAİYE", en: "Fire Truck" },
 
       // Hayvanlar
       { id: "aslan", tr: "ASLAN", en: "Lion" },
