@@ -2,439 +2,632 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <title>Araçları Eşleştirme - V25.2</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nesne Eşleme Oyunu – V26</title>
   <style>
-    /* ==== GENEL AYARLAR ==== */
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body{
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: linear-gradient(135deg, #fdfbfb, #ebedee);
-      min-height: 100vh;
+      background: linear-gradient(135deg,#7cc5ff,#d5ecff);
+      height:100vh;
+      overflow:hidden;
+      display:flex;
+      justify-content:center;
+      align-items:center;
     }
 
-    .app-wrapper {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 16px;
-      position: relative;
+    .hidden{display:none;}
+
+    /* MENÜ */
+    #menuScreen{
+      width:100%; height:100%;
+      display:flex; justify-content:center; align-items:center;
+    }
+    .menu-box{
+      background:#fff;
+      padding:32px;
+      border-radius:22px;
+      box-shadow:0 12px 32px rgba(0,0,0,0.2);
+      width:380px;
+      text-align:center;
+    }
+    .menu-box h1{
+      font-size:28px;
+      margin-bottom:8px;
+      color:#1e4d90;
+    }
+    .menu-box p{
+      font-size:14px;
+      margin-bottom:14px;
+      color:#444;
+    }
+    .menu-btn{
+      width:100%; padding:10px 12px;
+      border:none; border-radius:999px;
+      background:linear-gradient(135deg,#4da3ff,#6cc6ff);
+      color:#fff; font-size:16px; font-weight:600;
+      margin:6px 0;
+      cursor:pointer;
+      box-shadow:0 8px 20px rgba(0,0,0,0.18);
+    }
+    .menu-btn:hover{ filter:brightness(1.05); }
+    .menu-footer{
+      margin-top:14px;
+      font-size:12px;
+      color:#355;
+    }
+    .menu-footer span{font-weight:700;}
+
+    /* OYUN EKRANI */
+    #gameScreen{
+      width:100%; height:100%;
+      position:relative;
+      display:none;
     }
 
-    /* ==== ÜST BAR & MENÜ BUTONU ==== */
-
-    .top-bar {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      margin-bottom: 8px;
+    /* Üst bar */
+    #topBar{
+      position:absolute;
+      top:10px; left:0; width:100%;
+      display:flex; justify-content:space-between;
+      padding:0 20px;
+      z-index:10;
+      align-items:center;
+    }
+    #backBtn{
+      padding:6px 16px;
+      border-radius:18px;
+      border:none;
+      background:#ffffffbb;
+      font-size:13px;
+      font-weight:600;
+      cursor:pointer;
+    }
+    #soundBtn{
+      padding:6px 18px;
+      border-radius:18px;
+      border:none;
+      background:#ffa946;
+      font-size:13px;
+      font-weight:700;
+      cursor:pointer;
+    }
+    #soundBtn.muted{
+      background:#ddd; color:#555;
     }
 
-    .menu-button {
-      border: none;
-      padding: 10px 16px;
-      border-radius: 999px;
-      background: #ffca28;
-      font-weight: 600;
-      cursor: pointer;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-      transition: transform 0.1s ease, box-shadow 0.1s ease;
+    /* Yönerge */
+    #instructionBox{
+      position:absolute;
+      left:20px; bottom:20px;
+      background:#ffffff66;
+      border:2px solid #000;
+      border-radius:10px;
+      padding:10px 16px;
+      font-size:14px;
+      font-weight:700;
     }
 
-    .menu-button:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.18);
+    /* Kart alanları */
+    #optionsRow{
+      position:absolute;
+      top:90px;
+      left:50%; transform:translateX(-50%);
+      display:flex; gap:26px;
+    }
+    #dragArea{
+      position:absolute;
+      top:340px;
+      left:50%; transform:translateX(-50%);
     }
 
-    .game-title {
-      font-size: 1.5rem;
+    .card{
+      width:150px; height:230px;
+      background:#fff;
+      border-radius:20px;
+      box-shadow:0 8px 22px rgba(0,0,0,0.22);
+      padding:10px;
+      display:flex; flex-direction:column;
+      align-items:center;
+      text-align:center;
+      user-select:none;
+    }
+    .card-title{
+      font-size:16px;
+      font-weight:800;
+      margin-bottom:4px;
+    }
+    .card-img{
+      flex:1;
+      display:flex; justify-content:center; align-items:center;
+    }
+    .card-img img{
+      max-width:100%;
+      max-height:120px;
+      object-fit:contain;
+    }
+    .card-sub{
+      font-size:13px;
+      color:#444;
+      margin-top:4px;
     }
 
-    /* ==== OYUN ALANI ==== */
-
-    .game-area {
-      position: relative;
-      padding-bottom: 180px; /* sembol tahtası için alt boşluk */
+    .card.correct{
+      box-shadow:0 0 0 4px #2ecc71 inset, 0 8px 22px rgba(0,0,0,0.22);
+    }
+    .card.wrong{
+      box-shadow:0 0 0 4px #ff3b30 inset, 0 8px 22px rgba(0,0,0,0.22);
     }
 
-    .card-row {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 24px;
+    /* Sembol bar (ortada, kartın altında) */
+    #symbolBar{
+      position:absolute;
+      bottom:100px;
+      left:50%; transform:translateX(-50%);
+      display:flex; gap:6px;
+      padding:6px 10px;
+      background:#ffffff66;
+      border-radius:14px;
+    }
+    .bar-star{
+      font-size:22px;
+      opacity:0.4;
+    }
+    .bar-star.active{
+      opacity:1; color:#f7ba3e;
     }
 
-    /* Üst kartları menüye daha yakın, altla mesafe olsun */
-    .top-cards {
-      margin-top: 8px;      /* menü butonuna yakın */
-      margin-bottom: 64px;  /* üst & alt kartlar arası boşluk */
+    /* Sembol tahtası – sağ alt, dikdörtgen (dikey uzun) */
+    #symbolBoard{
+      position:absolute;
+      right:20px;
+      bottom:20px;
+      width:140px;   /* yatay kısa */
+      height:200px;  /* dikey uzun */
+      background:#ffffff80;
+      border-radius:16px;
+      box-shadow:0 6px 18px rgba(0,0,0,0.25);
+      display:grid;
+      grid-template-columns:repeat(2,1fr); /* 2 sütun x 4 satır = 8 yıldız */
+      justify-items:center;
+      align-items:center;
+      padding:10px 4px;
+      row-gap:8px;
+    }
+    .board-star{
+      font-size:26px;
+      opacity:0.25;
+      color:#ff9800;
+    }
+    .board-star.filled{
+      opacity:1;
     }
 
-    .bottom-cards {
-      margin-bottom: 40px;
-    }
-
-    /* ==== KART TASARIMI ==== */
-
-    .card {
-      width: 140px;
-      height: 180px;
-      border-radius: 16px;
-      background: #ffffff;
-      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      align-items: center;
-      padding: 8px;
-      text-align: center;
-      user-select: none;
-    }
-
-    .card img {
-      max-width: 100%;
-      max-height: 90px;
-      object-fit: contain;
-      user-select: none;
-      pointer-events: none; /* sürüklemede sadece kart tutulacak */
-    }
-
-    .card-label {
-      font-size: 0.95rem;
-      font-weight: 600;
-    }
-
-    /* Sürüklenebilir kart */
-    .draggable {
-      cursor: grab;
-    }
-
-    .draggable:active {
-      cursor: grabbing;
-    }
-
-    /* Hedef kart (drop alanı) */
-    .drop-zone {
-      border: 3px dashed #b0bec5;
-      position: relative;
-      transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
-    }
-
-    .drop-placeholder {
-      opacity: 0.3;
-      max-width: 100%;
-      max-height: 90px;
-    }
-
-    .drop-zone .card-label {
-      opacity: 0.7;
-    }
-
-    .drop-zone.highlight {
-      border-color: #42a5f5;
-      box-shadow: 0 0 0 3px rgba(66, 165, 245, 0.2);
-    }
-
-    .drop-zone.matched {
-      border-style: solid;
-      border-color: #66bb6a;
-      background: #e8f5e9;
-    }
-
-    /* ==== SEMBOL TAHTASI (SAĞ ALT DİKDÖRTGEN) ==== */
-
-    .symbol-board {
-      position: fixed;
-      right: 24px;
-      bottom: 24px;
-      width: 260px;   /* kısa kenar yatay */
-      height: 140px;  /* uzun kenar dikey */
-      background: #ffffff;
-      border-radius: 24px;
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
-      padding: 12px 16px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      z-index: 100;
-    }
-
-    .symbol-title {
-      font-weight: 700;
-      font-size: 1rem;
-      margin-bottom: 4px;
-    }
-
-    .symbol-stars {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-
-    .star {
-      font-size: 1.4rem;
-      opacity: 0.25;
-      transition: opacity 0.2s ease, transform 0.2s ease;
-    }
-
-    .star.active {
-      opacity: 1;
-      transform: scale(1.05);
-    }
-
-    /* ==== KÜÇÜK EKRAN ==== */
-
-    @media (max-width: 768px) {
-      .card {
-        width: 120px;
-        height: 160px;
-      }
-
-      .symbol-board {
-        width: 220px;
-        height: 130px;
-        right: 12px;
-        bottom: 12px;
-      }
+    /* Uçan yıldız animasyonu */
+    .floating-star{
+      position:fixed;
+      font-size:26px;
+      pointer-events:none;
+      z-index:999;
+      transition:transform .6s ease, opacity .6s ease;
     }
   </style>
 </head>
 <body>
-  <div class="app-wrapper">
-    <header class="top-bar">
-      <button class="menu-button" onclick="goToMenu()">
-        ⬅ Men&uuml;ye D&ouml;n
-      </button>
-      <h1 class="game-title">Araçları Eşleştirme</h1>
-    </header>
 
-    <main class="game-area">
-      <!-- Üstteki sürüklenebilir kartlar -->
-      <section class="card-row top-cards" id="topCards"></section>
+<!-- MENÜ -->
+<div id="menuScreen">
+  <div class="menu-box">
+    <h1>NESNE EŞLEME</h1>
+    <p>Eşleme zorluğunu seç:</p>
 
-      <!-- Alttaki hedef kartlar -->
-      <section class="card-row bottom-cards" id="bottomCards"></section>
+    <button class="menu-btn" data-opts="1">1 Seçenekli</button>
+    <button class="menu-btn" data-opts="2">2 Seçenekli</button>
+    <button class="menu-btn" data-opts="3">3 Seçenekli</button>
+    <button class="menu-btn" data-opts="4">4 Seçenekli</button>
+    <button class="menu-btn" data-opts="5">5 Seçenekli</button>
+    <button class="menu-btn" data-opts="7">7 Seçenekli</button>
 
-      <!-- Sağ alt köşede sembol tahtası -->
-      <aside class="symbol-board">
-        <div class="symbol-title">Sembol Tahtası</div>
-        <div class="symbol-stars" id="symbolStars"></div>
-      </aside>
-    </main>
+    <div class="menu-footer">
+      <span>Powered by</span> Pika &amp; Berk 🌟
+    </div>
+  </div>
+</div>
+
+<!-- OYUN -->
+<div id="gameScreen">
+
+  <div id="topBar">
+    <button id="backBtn">← Menüye Dön</button>
+    <button id="soundBtn">🔊 SES AÇIK</button>
   </div>
 
-  <script>
-    /* =================== VERİLER =================== */
-    const cardsData = [
-      {
-        id: "itfaiye_arabasi",
-        label: "İtfaiye Arabası",
-        image: "itfaiye_arabasi.png"   // >>> İSTEDİĞİN DOSYA ADI <<<
-      },
-      {
-        id: "polis_arabasi",
-        label: "Polis Arabası",
-        image: "polis_arabasi.png"
-      },
-      {
-        id: "ambulans",
-        label: "Ambulans",
-        image: "ambulans.png"
-      },
-      {
-        id: "otobus",
-        label: "Otobüs",
-        image: "otobus.png"
-      }
-    ];
+  <div id="instructionBox">
+    YÖNERGE:<br>
+    - EŞLE<br>
+    - AYNI OLANI EŞLE
+  </div>
 
-    // İstersen sadece İTFAİYE ile çalışmak için:
-    // const cardsData = [ { id:"itfaiye_arabasi", label:"İtfaiye Arabası", image:"itfaiye_arabasi.png" } ];
+  <div id="optionsRow"></div>
+  <div id="dragArea"></div>
 
-    const TOTAL_STARS = 8;
-    let draggedCardId = null;
-    let matchedCount = 0;
+  <div id="symbolBar">
+    <span class="bar-star" id="bar1">⭐</span>
+    <span class="bar-star" id="bar2">⭐</span>
+    <span class="bar-star" id="bar3">⭐</span>
+    <span class="bar-star" id="bar4">⭐</span>
+    <span class="bar-star" id="bar5">⭐</span>
+    <span class="bar-star" id="bar6">⭐</span>
+    <span class="bar-star" id="bar7">⭐</span>
+    <span class="bar-star" id="bar8">⭐</span>
+  </div>
 
-    /* =================== WEB AUDIO (DİJİTAL BİP) =================== */
-    let audioContext = null;
+  <div id="symbolBoard">
+    <span class="board-star" id="s1">⭐</span>
+    <span class="board-star" id="s2">⭐</span>
+    <span class="board-star" id="s3">⭐</span>
+    <span class="board-star" id="s4">⭐</span>
+    <span class="board-star" id="s5">⭐</span>
+    <span class="board-star" id="s6">⭐</span>
+    <span class="board-star" id="s7">⭐</span>
+    <span class="board-star" id="s8">⭐</span>
+  </div>
 
-    function initAudioContext() {
-      if (!audioContext) {
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+</div>
+
+<script>
+  // ================== OYUN VERİLERİ ==================
+  const items = [
+    // Meyve
+    {tr:"elma", en:"apple", file:"elma.png"},
+    {tr:"armut", en:"pear", file:"armut.png"},
+    {tr:"muz", en:"banana", file:"muz.png"},
+    {tr:"uzum", en:"grape", file:"uzum.png"},
+    {tr:"ananas", en:"pineapple", file:"ananas.png"},
+    {tr:"cilek", en:"strawberry", file:"cilek.png"},
+    {tr:"karpuz", en:"watermelon", file:"karpuz.png"},
+    {tr:"kavun", en:"melon", file:"kavun.png"},
+    {tr:"portakal", en:"orange", file:"portakal.png"},
+    {tr:"kivi", en:"kiwi", file:"kivi.png"},
+    // Sebze
+    {tr:"domates", en:"tomato", file:"domates.png"},
+    {tr:"salatalik", en:"cucumber", file:"salatalik.png"},
+    {tr:"biber", en:"pepper", file:"biber.png"},
+    {tr:"sarimsak", en:"garlic", file:"sarimsak.png"},
+    {tr:"sogan", en:"onion", file:"sogan.png"},
+    {tr:"brokoli", en:"broccoli", file:"brokoli.png"},
+    {tr:"havuc", en:"carrot", file:"havuc.png"},
+    {tr:"lahana", en:"cabbage", file:"lahana.png"},
+    {tr:"misir", en:"corn", file:"misir.png"},
+    {tr:"patlican", en:"eggplant", file:"patlican.png"},
+    // Taşıt
+    {tr:"araba", en:"car", file:"araba.png"},
+    {tr:"kamyon", en:"truck", file:"kamyon.png"},
+    {tr:"itfaiye arabasi", en:"fire truck", file:"itfaiye_arabasi.png"},
+    {tr:"motorsiklet", en:"motorcycle", file:"motorsiklet.png"},
+    {tr:"bisiklet", en:"bicycle", file:"bisiklet.png"},
+    {tr:"gemi", en:"ship", file:"gemi.png"},
+    {tr:"helikopter", en:"helicopter", file:"helikopter.png"},
+    {tr:"ucak", en:"airplane", file:"ucak.png"},
+    {tr:"tren", en:"train", file:"tren.png"},
+    {tr:"otobus", en:"bus", file:"otobus.png"},
+    // Hayvan
+    {tr:"aslan", en:"lion", file:"aslan.png"},
+    {tr:"kaplan", en:"tiger", file:"kaplan.png"},
+    {tr:"kedi", en:"cat", file:"kedi.png"},
+    {tr:"kopek", en:"dog", file:"kopek.png"},
+    {tr:"tavsan", en:"rabbit", file:"tavsan.png"},
+    {tr:"ayi", en:"bear", file:"ayi.png"},
+    {tr:"fil", en:"elephant", file:"fil.png"},
+    {tr:"kurbaga", en:"frog", file:"kurbaga.png"},
+    {tr:"karga", en:"crow", file:"karga.png"},
+    {tr:"tavuk", en:"chicken", file:"tavuk.png"}
+  ];
+
+  const menuScreen = document.getElementById("menuScreen");
+  const gameScreen = document.getElementById("gameScreen");
+  const optionsRow = document.getElementById("optionsRow");
+  const dragArea = document.getElementById("dragArea");
+  const backBtn = document.getElementById("backBtn");
+  const soundBtn = document.getElementById("soundBtn");
+
+  const barStars = [
+    document.getElementById("bar1"),
+    document.getElementById("bar2"),
+    document.getElementById("bar3"),
+    document.getElementById("bar4"),
+    document.getElementById("bar5"),
+    document.getElementById("bar6"),
+    document.getElementById("bar7"),
+    document.getElementById("bar8")
+  ];
+  const boardStars = [
+    document.getElementById("s1"),
+    document.getElementById("s2"),
+    document.getElementById("s3"),
+    document.getElementById("s4"),
+    document.getElementById("s5"),
+    document.getElementById("s6"),
+    document.getElementById("s7"),
+    document.getElementById("s8")
+  ];
+
+  let optionCount = 4;
+  let currentItem = null;
+  let optionItems = [];
+  let currentDragCard = null;
+  let canDrag = true;
+  let successCount = 0; // kazanılan sembol sayısı
+
+  // Ses: Web Audio ile bip (mp3 yerine)
+  let audioCtx = null;
+  function initAudio(){
+    if(!audioCtx){
+      try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+      catch(e){ audioCtx = null; }
+    }
+  }
+  let soundEnabled = true;
+  function playBeep(type="ok"){
+    if(!soundEnabled) return;
+    initAudio();
+    if(!audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    let freq = 600, dur = 0.15;
+    if(type==="ok"){ freq=700; dur=0.16; }
+    if(type==="err"){ freq=200; dur=0.2; }
+    if(type==="final"){ freq=900; dur=0.25; }
+    osc.frequency.value = freq;
+    const now = audioCtx.currentTime;
+    osc.start(now);
+    osc.stop(now+dur);
+  }
+
+  soundBtn.addEventListener("click",()=>{
+    soundEnabled = !soundEnabled;
+    if(soundEnabled){
+      soundBtn.classList.remove("muted");
+      soundBtn.textContent = "🔊 SES AÇIK";
+      playBeep("ok");
+    }else{
+      soundBtn.classList.add("muted");
+      soundBtn.textContent = "🔈 SES KAPALI";
+    }
+  });
+
+  // Menü butonları
+  document.querySelectorAll(".menu-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      optionCount = parseInt(btn.dataset.opts,10) || 4;
+      startGame();
+    });
+  });
+
+  function startGame(){
+    menuScreen.style.display="none";
+    gameScreen.style.display="block";
+    successCount = 0;
+    updateSymbols();
+    nextRound();
+  }
+
+  backBtn.addEventListener("click",()=>{
+    gameScreen.style.display="none";
+    menuScreen.style.display="flex";
+  });
+
+  // Sembol güncelle
+  function updateSymbols(){
+    for(let i=0;i<8;i++){
+      if(i < successCount){
+        barStars[i].classList.remove("active");
+        boardStars[i].classList.add("filled");
+      }else{
+        barStars[i].classList.add("active");
+        boardStars[i].classList.remove("filled");
       }
     }
-
-    function playBeep(type = "success") {
-      initAudioContext();
-      const osc = audioContext.createOscillator();
-      const gain = audioContext.createGain();
-
-      osc.type = "square";
-      osc.frequency.value = type === "success" ? 880 : 220; // ince / kalın
-
-      osc.connect(gain);
-      gain.connect(audioContext.destination);
-
-      const now = audioContext.currentTime;
-      gain.gain.setValueAtTime(0.2, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
-
-      osc.start(now);
-      osc.stop(now + 0.15);
+    if(successCount>=8){
+      playBeep("final");
+      setTimeout(()=>{
+        successCount = 0;
+        updateSymbols();
+      },700);
     }
+  }
 
-    /* =================== DOM YÜKLENDİĞİNDE =================== */
-    document.addEventListener("DOMContentLoaded", () => {
-      renderCards();
-      setupSymbolBoard();
+  // Uçan yıldız animasyonu (bar → board)
+  function animateSymbol(){
+    const barRect = document.getElementById("symbolBar").getBoundingClientRect();
+    const boardRect = document.getElementById("symbolBoard").getBoundingClientRect();
+    const startX = barRect.left + barRect.width/2;
+    const startY = barRect.top + barRect.height/2;
+    const endX = boardRect.left + boardRect.width/2;
+    const endY = boardRect.top + boardRect.height/2;
+
+    const star = document.createElement("div");
+    star.className = "floating-star";
+    star.textContent = "⭐";
+    star.style.left = startX+"px";
+    star.style.top = startY+"px";
+    document.body.appendChild(star);
+
+    requestAnimationFrame(()=>{
+      const dx = endX - startX;
+      const dy = endY - startY;
+      star.style.transform = `translate(${dx}px, ${dy}px)`;
+      star.style.opacity = "0";
     });
 
-    /* =================== KARTLARI OLUŞTUR =================== */
-    function renderCards() {
-      const topContainer = document.getElementById("topCards");
-      const bottomContainer = document.getElementById("bottomCards");
+    setTimeout(()=>{ star.remove(); updateSymbols(); }, 600);
+  }
 
-      // Üst kartları karışık sırala
-      const shuffled = [...cardsData].sort(() => Math.random() - 0.5);
+  // Yeni tur
+  function nextRound(){
+    canDrag = true;
+    // Rastgele nesne
+    currentItem = items[Math.floor(Math.random()*items.length)];
 
-      // ÜST: sürüklenebilir kartlar
-      shuffled.forEach(card => {
-        const cardEl = document.createElement("div");
-        cardEl.className = "card draggable";
-        cardEl.draggable = true;
-        cardEl.dataset.cardId = card.id;
+    // Seçenekler
+    let others = items.filter(it=>it!==currentItem);
+    shuffle(others);
+    optionItems = [currentItem, ...others.slice(0, optionCount-1)];
+    shuffle(optionItems);
 
-        cardEl.innerHTML = `
-          <img src="${card.image}" alt="${card.label}" />
-          <div class="card-label">${card.label}</div>
-        `;
+    renderCards();
+  }
 
-        cardEl.addEventListener("dragstart", onDragStart);
-        cardEl.addEventListener("dragend", onDragEnd);
+  function shuffle(arr){
+    for(let i=arr.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [arr[i],arr[j]]=[arr[j],arr[i]];
+    }
+  }
 
-        topContainer.appendChild(cardEl);
-      });
+  function renderCards(){
+    optionsRow.innerHTML = "";
+    dragArea.innerHTML = "";
 
-      // ALT: hedef (drop) kartları
-      cardsData.forEach(card => {
-        const dropEl = document.createElement("div");
-        dropEl.className = "card drop-zone";
-        dropEl.dataset.cardId = card.id;
+    // Üst kartlar
+    optionItems.forEach(obj=>{
+      const c = createCard(obj);
+      c.classList.add("opt-card");
+      c.dataset.tr = obj.tr;
+      optionsRow.appendChild(c);
+    });
 
-        dropEl.innerHTML = `
-          <img class="drop-placeholder" src="${card.image}" alt="${card.label}" />
-          <div class="card-label">${card.label}</div>
-        `;
+    // Drag kart
+    const d = createCard(currentItem);
+    d.id="dragCard";
+    d.style.position="absolute";
+    dragArea.appendChild(d);
+    currentDragCard = d;
+    enableDrag(d);
+  }
 
-        dropEl.addEventListener("dragover", onDragOver);
-        dropEl.addEventListener("dragleave", onDragLeave);
-        dropEl.addEventListener("drop", onDrop);
+  function createCard(obj){
+    const div = document.createElement("div");
+    div.className="card";
+    div.innerHTML = `
+      <div class="card-title">${obj.tr.toUpperCase()}</div>
+      <div class="card-img"><img src="assets/${obj.file}" alt="${obj.tr}"></div>
+      <div class="card-sub">${obj.en}</div>
+    `;
+    return div;
+  }
 
-        bottomContainer.appendChild(dropEl);
-      });
+  // Drag & drop
+  function enableDrag(card){
+    let startX=0, startY=0;
+    let baseX=0, baseY=0;
+    let dragging=false;
+
+    function getTransformXY(el){
+      const st = getComputedStyle(el);
+      const m = new DOMMatrixReadOnly(st.transform);
+      return {x:m.m41, y:m.m42};
     }
 
-    /* =================== DRAG & DROP EVENTLERİ =================== */
+    card.addEventListener("pointerdown", e=>{
+      if(!canDrag) return;
+      dragging=true;
+      card.setPointerCapture(e.pointerId);
+      const t = getTransformXY(card);
+      baseX = t.x;
+      baseY = t.y;
+      startX = e.clientX;
+      startY = e.clientY;
+      card.style.transition="none";
+    });
 
-    function onDragStart(e) {
-      const cardEl = e.currentTarget; // her zaman .card
-      draggedCardId = cardEl.dataset.cardId;
+    card.addEventListener("pointermove", e=>{
+      if(!dragging) return;
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+      card.style.transform = `translate(${baseX+dx}px, ${baseY+dy}px)`;
+    });
 
-      // bazı tarayıcılarda bu zorunlu
-      e.dataTransfer.effectAllowed = "move";
-      e.dataTransfer.setData("text/plain", draggedCardId);
-    }
+    card.addEventListener("pointerup", e=>{
+      if(!dragging) return;
+      dragging=false;
+      card.releasePointerCapture(e.pointerId);
+      handleDrop(card);
+    });
+  }
 
-    function onDragEnd() {
-      draggedCardId = null;
-    }
-
-    function onDragOver(e) {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = "move";
-      this.classList.add("highlight");
-    }
-
-    function onDragLeave() {
-      this.classList.remove("highlight");
-    }
-
-    function onDrop(e) {
-      e.preventDefault();
-      this.classList.remove("highlight");
-
-      const targetId = this.dataset.cardId;
-      const droppedId = draggedCardId || e.dataTransfer.getData("text/plain");
-      if (!droppedId) return;
-
-      if (targetId === droppedId) {
-        handleCorrectDrop(this, droppedId);
-      } else {
-        handleWrongDrop();
+  function handleDrop(card){
+    const dragRect = card.getBoundingClientRect();
+    const opts = Array.from(document.querySelectorAll(".opt-card"));
+    let hit = null;
+    for(const c of opts){
+      const r = c.getBoundingClientRect();
+      const overlap = !(dragRect.right<r.left ||
+                        dragRect.left>r.right ||
+                        dragRect.bottom<r.top ||
+                        dragRect.top>r.bottom);
+      if(overlap){
+        hit = c;
+        break;
       }
     }
+    if(!hit){
+      wrongFeedback(card);
+      return;
+    }
+    if(hit.dataset.tr === currentItem.tr){
+      correctFeedback(card, hit);
+    }else{
+      wrongFeedback(card);
+    }
+  }
 
-    function handleCorrectDrop(dropZone, cardId) {
-      // Aynı yere tekrar eşleşme yapılmasın
-      if (dropZone.classList.contains("matched")) return;
+  function resetCardPos(card, fast=false){
+    card.style.transition = fast ? "transform 0s" : "transform 0.25s ease";
+    card.style.transform = "translate(0px,0px)";
+  }
 
-      // Üstteki kartı bul ve pasif hale getir
-      const topCards = document.querySelectorAll(".draggable");
-      topCards.forEach(card => {
-        if (card.dataset.cardId === cardId) {
-          card.draggable = false;
-          card.style.opacity = "0.3";
-          card.style.cursor = "default";
-        }
-      });
+  function wrongFeedback(card){
+    canDrag=false;
+    card.classList.add("wrong");
+    playBeep("err");
+    setTimeout(()=>{
+      card.classList.remove("wrong");
+      resetCardPos(card,false);
+      setTimeout(()=>{canDrag=true;},260);
+    },260);
+  }
 
-      dropZone.classList.add("matched");
-      playBeep("success");
-      increaseScore();
+  function correctFeedback(card, target){
+    canDrag=false;
+    card.classList.add("correct");
+    target.classList.add("correct");
+    playBeep("ok");
+
+    const dragRect = card.getBoundingClientRect();
+    const targetRect = target.getBoundingClientRect();
+    const dx = (targetRect.left + targetRect.width/2) - (dragRect.left + dragRect.width/2);
+    const dy = (targetRect.top + targetRect.height/2) - (dragRect.top + dragRect.height/2);
+
+    card.style.transition="transform 0.35s ease";
+    card.style.transform=`translate(${dx}px,${dy}px)`;
+
+    // Sembol kazan
+    if(successCount<8){
+      successCount++;
+      animateSymbol();
     }
 
-    function handleWrongDrop() {
-      playBeep("error");
-    }
+    setTimeout(()=>{
+      target.classList.remove("correct");
+      card.classList.remove("correct");
+      resetCardPos(card,true);
+      nextRound();
+      canDrag=true;
+    },650);
+  }
+</script>
 
-    /* =================== SEMBOL TAHTASI - YILDIZLAR =================== */
-
-    function setupSymbolBoard() {
-      const container = document.getElementById("symbolStars");
-      container.innerHTML = "";
-
-      for (let i = 0; i < TOTAL_STARS; i++) {
-        const star = document.createElement("span");
-        star.className = "star";
-        star.textContent = "★";
-        container.appendChild(star);
-      }
-
-      updateStars();
-    }
-
-    function increaseScore() {
-      matchedCount++;
-      if (matchedCount > TOTAL_STARS) matchedCount = TOTAL_STARS;
-      updateStars();
-    }
-
-    function updateStars() {
-      const stars = document.querySelectorAll(".symbol-board .star");
-      stars.forEach((star, index) => {
-        star.classList.toggle("active", index < matchedCount);
-      });
-    }
-
-    /* =================== MENÜ BUTONU =================== */
-
-    function goToMenu() {
-      alert("Buraya ana menü sayfanın linkini ekleyebilirsin, Pikam 💛");
-    }
-  </script>
 </body>
 </html>
