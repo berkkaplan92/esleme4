@@ -671,34 +671,39 @@ function playSound(audio) {
       }
     }
 
-    function updateSymbols() {
-      barStars.forEach((s, i) => {
-        if (i < MAX_SYMBOLS - earnedSymbols) s.classList.add("active");
-        else s.classList.remove("active");
-      });
-      boardStars.forEach((s, i) => {
-        if (i < earnedSymbols) s.classList.add("filled");
-        else s.classList.remove("filled");
-      });
-      // Her seferinde eski tıklamaları sıfırla
+function updateSymbols() {
+  barStars.forEach((s, i) => {
+    if (i < MAX_SYMBOLS - earnedSymbols) s.classList.add("active");
+    else s.classList.remove("active");
+  });
+
+  boardStars.forEach((s, i) => {
+    if (i < earnedSymbols) s.classList.add("filled");
+    else s.classList.remove("filled");
+  });
+
+  // Her seferinde eski tıklamaları sıfırla
   boardStars.forEach((star) => {
     star.style.cursor = "default";
     star.onclick = null;
   });
 
-  // 8 sembole ulaştıysak geri sayma modunu aç
+  // 8 sembole ulaşıldıysa sayma moduna geç
   if (earnedSymbols >= MAX_SYMBOLS) {
 
-    // 🔊 Yeni eklenen yönlendirme sesi
     playSound(letsCountVoice);
 
-    // Ses bittikten sonra sayma modu başlasın
     setTimeout(() => {
-        enableCountingMode();
+      enableCountingMode();
     }, 1200);
-}
+  }
+}  // ←←← BURASI EKSİKTİ !!
 
-    function enableCountingMode() {
+
+// -------------------------------
+// SAYMA MODU
+// -------------------------------
+function enableCountingMode() {
   countingMode = true;
   countingIndex = 0;
 
@@ -707,12 +712,10 @@ function playSound(audio) {
 
     star.onclick = () => {
       if (!countingMode) return;
-      if (index !== countingIndex) return; // sırayla tıklanacak
+      if (index !== countingIndex) return;
 
-      // Bu yıldızı tahtadan sil
       star.classList.remove("filled");
 
-      // Bar tarafında geri doldur (tersten)
       const barIndex = MAX_SYMBOLS - 1 - countingIndex;
       if (barStars[barIndex]) {
         barStars[barIndex].classList.add("active");
@@ -720,7 +723,6 @@ function playSound(audio) {
 
       countingIndex++;
 
-      // Hepsi sayıldıysa sıfırla
       if (countingIndex >= MAX_SYMBOLS) {
         countingMode = false;
         earnedSymbols = 0;
