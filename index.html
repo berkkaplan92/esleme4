@@ -795,19 +795,19 @@ dragCard.addEventListener("pointerdown", (e) => {
   pointerId = e.pointerId;
   dragCard.setPointerCapture(pointerId);
 
+  // 1) Transform'u tamamen sıfırla
+  dragCard.style.transition = "none";
+  dragCard.style.transform = "translate(0px, 0px)";
+
+  // 2) Güncel rect'i sıfır transform sonrası oku
   const rect = dragCard.getBoundingClientRect();
 
-  const style = window.getComputedStyle(dragCard);
-  const matrix = new DOMMatrixReadOnly(style.transform);
-  const currentX = matrix.m41;
-  const currentY = matrix.m42;
+  // 3) Tıklanan noktanın kart içindeki konumunu al
+  offsetX = e.clientX - rect.left;
+  offsetY = e.clientY - rect.top;
 
-  offsetX = e.clientX - (rect.left + currentX);
-  offsetY = e.clientY - (rect.top + currentY);
-
-  dragCard.style.transition = "none";
   dragCard.style.cursor = "grabbing";
-  });
+});
   
 dragCard.addEventListener("pointermove", (e) => {
   if (!isDragging || e.pointerId !== pointerId) return;
