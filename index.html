@@ -691,13 +691,18 @@ function updateSymbols() {
   // 8 sembole ulaşıldıysa sayma moduna geç
   if (earnedSymbols >= MAX_SYMBOLS) {
 
-    playSound(letsCountVoice);
-
+    // Övgü sesinin bitmesini beklet (1.6 saniye)
     setTimeout(() => {
-      enableCountingMode();
-    }, 1200);
-  }
-}  // ←←← BURASI EKSİKTİ !!
+        playSound(letsCountVoice);
+
+        // Sayma modunu 1.2 saniye sonra başlat
+        setTimeout(() => {
+            enableCountingMode();
+        }, 1200);
+
+    }, 1600);
+}
+
 
 
 // -------------------------------
