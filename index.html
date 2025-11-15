@@ -224,7 +224,7 @@
 
     #optionsRow {
       position: absolute;
-      top: 55px; /* biraz daha yukarı alındı */
+      top: 55px; /* senin sevdiğin ayar */
       left: 50%;
       transform: translateX(-50%);
       display: flex;
@@ -236,7 +236,7 @@
 
     #dragArea {
       position: absolute;
-      top: 350px; /* biraz yukarı alındı (önceden 360'tı) */
+      top: 355px; /* senin sevdiğin ayar */
       left: 50%;
       transform: translateX(-50%);
       z-index: 2;
@@ -295,9 +295,9 @@
     }
 
     .drag-card {
-    cursor: grab;
-    transition: transform 0.15s ease;
-    touch-action: none; /* sürüklemeyi mükemmelleştirir */
+      cursor: grab;
+      user-select: none;
+      touch-action: none;
     }
 
     /* Sembol alanları */
@@ -328,8 +328,8 @@
       position: absolute;
       right: 40px;
       bottom: 30px;
-      width: 380px; /* büyütüldü */
-      height: 120px; /* büyütüldü */
+      width: 340px; /* biraz büyütüldü */
+      height: 110px;
       border-radius: 16px;
       background: rgba(255, 255, 255, 0.5);
       box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.5),
@@ -337,7 +337,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
     }
 
     .symbol-star {
@@ -360,7 +360,7 @@
       color: #ff9800;
       opacity: 0.2;
       cursor: default;
-      font-size: 28px;
+      font-size: 32px;
     }
 
     .board-star.filled {
@@ -567,27 +567,26 @@
     let earnedSymbols = 0;
     let soundEnabled = true;
 
-    // 🔊 SESLER – URL YERLERİ
-    // Buradaki URL'leri kendi mp3 linklerinle değiştir.
+    // 🔊 SESLER – dosyaları assets/sounds içine koymalısın
     const successVoices = [
-      new Audio("https://ORNEK-URL/aferin.mp3"),
-      new Audio("https://ORNEK-URL/bravo.mp3"),
-      new Audio("https://ORNEK-URL/supersin.mp3"),
-      new Audio("https://ORNEK-URL/harika-gidiyorsun.mp3")
+      new Audio("assets/sounds/success1.mp3"),
+      new Audio("assets/sounds/success2.mp3"),
+      new Audio("assets/sounds/success3.mp3"),
+      new Audio("assets/sounds/success4.mp3")
     ];
 
     const countVoices = [
-      new Audio("https://ORNEK-URL/1.mp3"),
-      new Audio("https://ORNEK-URL/2.mp3"),
-      new Audio("https://ORNEK-URL/3.mp3"),
-      new Audio("https://ORNEK-URL/4.mp3"),
-      new Audio("https://ORNEK-URL/5.mp3"),
-      new Audio("https://ORNEK-URL/6.mp3"),
-      new Audio("https://ORNEK-URL/7.mp3"),
-      new Audio("https://ORNEK-URL/8.mp3")
+      new Audio("assets/sounds/1.mp3"),
+      new Audio("assets/sounds/2.mp3"),
+      new Audio("assets/sounds/3.mp3"),
+      new Audio("assets/sounds/4.mp3"),
+      new Audio("assets/sounds/5.mp3"),
+      new Audio("assets/sounds/6.mp3"),
+      new Audio("assets/sounds/7.mp3"),
+      new Audio("assets/sounds/8.mp3")
     ];
 
-    const allDoneVoice = new Audio("https://ORNEK-URL/tum-sembolleri-topladin.mp3");
+    const allDoneVoice = new Audio("assets/sounds/all_done.mp3");
 
     function playSound(audio) {
       if (!soundEnabled || !audio) return;
@@ -880,89 +879,168 @@
     }
 
     // ---------------------------
-// DRAG & DROP (YENİ SÜRÜM)
-// ---------------------------
+    // DRAG & DROP (FINAL SÜRÜM)
+    // ---------------------------
 
-let dragActive = false;
-let pointerId = null;
-let dragStartX = 0;
-let dragStartY = 0;
-let baseX = 0;
-let baseY = 0;
+    let isDragging = false;
+    let dragStartX = 0;
+    let dragStartY = 0;
+    let startPosX = 0;
+    let startPosY = 0;
+    let dragPosX = 0;
+    let dragPosY = 0;
+    let activePointerId = null;
 
-function getCurrentTransform(elem) {
-  const style = window.getComputedStyle(elem);
-  const matrix = new DOMMatrixReadOnly(style.transform);
-  return { x: matrix.m41, y: matrix.m42 };
-}
+    function resetDragPosition(immediate = false) {
+      const duration = immediate ? "0s" : "0.25s";
+      dragPosX = 0;
+      dragPosY = 0;
+      dragCard.style.transition = `transform ${duration}`;
+      dragCard.style.transform = "translate(0px, 0px)";
+    }
 
-function resetDragPosition(immediate = false) {
-  dragCard.style.transition = immediate ? "transform 0s" : "transform 0.25s ease";
-  dragCard.style.transform = "translate(0px, 0px)";
-}
+    dragCard.addEventListener("pointerdown", (e) => {
+      if (!canDrag) return;
 
-/* --------------------------------
-   POINTERDOWN
---------------------------------*/
-dragCard.addEventListener("pointerdown", (e) => {
-  if (!canDrag) return;
+      isDragging = true;
+      activePointerId = e.pointerId;
+      dragCard.setPointerCapture(activePointerId);
 
-  dragActive = true;
-  pointerId = e.pointerId;
+      dragCard.style.transition = "none";
+      dragCard.style.cursor = "grabbing";
 
-  dragCard.setPointerCapture(pointerId);
+      dragStartX = e.clientX;
+      dragStartY = e.clientY;
+      startPosX = dragPosX;
+      startPosY = dragPosY;
+    });
 
-  const current = getCurrentTransform(dragCard);
-  baseX = current.x;
-  baseY = current.y;
+    dragCard.addEventListener("pointermove", (e) => {
+      if (!isDragging || e.pointerId !== activePointerId) return;
 
-  dragStartX = e.clientX;
-  dragStartY = e.clientY;
+      const dx = e.clientX - dragStartX;
+      const dy = e.clientY - dragStartY;
 
-  dragCard.style.transition = "none";
+      dragPosX = startPosX + dx;
+      dragPosY = startPosY + dy;
 
-  // ⭐ drag hissi için çok önemli
-  dragCard.style.cursor = "grabbing";
-  dragCard.style.pointerEvents = "auto";
-});
+      dragCard.style.transform = `translate(${dragPosX}px, ${dragPosY}px)`;
+    });
 
-/* --------------------------------
-   POINTERMOVE
---------------------------------*/
-dragCard.addEventListener("pointermove", (e) => {
-  if (!dragActive || e.pointerId !== pointerId) return;
+    dragCard.addEventListener("pointerup", (e) => {
+      if (!isDragging || e.pointerId !== activePointerId) return;
 
-  const dx = e.clientX - dragStartX;
-  const dy = e.clientY - dragStartY;
+      isDragging = false;
+      dragCard.releasePointerCapture(activePointerId);
+      dragCard.style.cursor = "grab";
 
-  dragCard.style.transform = `translate(${baseX + dx}px, ${baseY + dy}px)`;
-});
+      handleDrop();
+    });
 
-/* --------------------------------
-   POINTERUP
---------------------------------*/
-dragCard.addEventListener("pointerup", (e) => {
-  if (!dragActive || e.pointerId !== pointerId) return;
+    dragCard.addEventListener("pointercancel", () => {
+      isDragging = false;
+      dragCard.style.cursor = "grab";
+      resetDragPosition(true);
+    });
 
-  dragActive = false;
-  dragCard.releasePointerCapture(pointerId);
+    // ---------------------------
+    // DROP KONTROLÜ
+    // ---------------------------
 
-  dragCard.style.cursor = "grab";
-  dragCard.style.pointerEvents = "auto";
+    function handleDrop() {
+      const dragRect = dragCard.getBoundingClientRect();
+      const optionCards = Array.from(
+        document.querySelectorAll(".option-card")
+      );
+      let hitCard = null;
+      let hitItem = null;
 
-  handleDrop();
-});
+      for (let i = 0; i < optionCards.length; i++) {
+        const card = optionCards[i];
+        const rect = card.getBoundingClientRect();
+        const overlap =
+          dragRect.right > rect.left &&
+          dragRect.left < rect.right &&
+          dragRect.bottom > rect.top &&
+          dragRect.top < rect.bottom;
+        if (overlap) {
+          hitCard = card;
+          hitItem = currentOptions[i];
+          break;
+        }
+      }
 
-/* --------------------------------
-   POINTERCANCEL
---------------------------------*/
-dragCard.addEventListener("pointercancel", () => {
-  dragActive = false;
-  dragCard.style.cursor = "grab";
-  dragCard.style.pointerEvents = "auto";
-  resetDragPosition(true);
-});
+      if (!hitCard || !hitItem) {
+        showWrongFeedback();
+        return;
+      }
 
+      if (hitItem.id === currentTarget.id) {
+        showCorrectFeedback(hitCard);
+      } else {
+        showWrongFeedback();
+      }
+    }
+
+    function showWrongFeedback() {
+      dragCard.classList.add("wrong");
+      canDrag = false;
+      setTimeout(() => {
+        dragCard.classList.remove("wrong");
+        resetDragPosition(false);
+        setTimeout(() => {
+          canDrag = true;
+        }, 260);
+      }, 260);
+    }
+
+    function showCorrectFeedback(targetCard) {
+      canDrag = false;
+      dragCard.classList.add("correct");
+      targetCard.classList.add("correct");
+
+      const dragRect = dragCard.getBoundingClientRect();
+      const targetRect = targetCard.getBoundingClientRect();
+      const dx =
+        targetRect.left +
+        targetRect.width / 2 -
+        (dragRect.left + dragRect.width / 2);
+      const dy =
+        targetRect.top +
+        targetRect.height / 2 -
+        (dragRect.top + dragRect.height / 2);
+
+      dragCard.style.transition = "transform 0.35s ease";
+      dragCard.style.transform = `translate(${dragPosX + dx}px, ${dragPosY + dy}px)`;
+
+      // Sembol kazanma
+      if (earnedSymbols < MAX_SYMBOLS) {
+        earnedSymbols++;
+        animateSymbolTransfer();
+        const voice =
+          successVoices[
+            Math.floor(Math.random() * successVoices.length)
+          ];
+        playSound(voice);
+      }
+
+      setTimeout(() => {
+        targetCard.classList.remove("correct");
+        dragCard.classList.remove("correct");
+        resetDragPosition(true);
+
+        // Aynı nesne 2 kere doğru eşlensin
+        correctCountForItem++;
+        if (correctCountForItem < 2) {
+          setupOptionsForSameItem(false);
+          canDrag = true;
+        } else {
+          setTimeout(() => {
+            setupNewRound();
+          }, 80);
+        }
+      }, 650);
+    }
 
     // ---------------------------
     // BAŞLANGIÇ
