@@ -880,155 +880,89 @@
     }
 
     // ---------------------------
-    // DRAG & DROP
-    // ---------------------------
+// DRAG & DROP (YENİ SÜRÜM)
+// ---------------------------
 
-    let dragActive = false;
-    let pointerId = null;
-    let dragStartX = 0;
-    let dragStartY = 0;
-    let baseX = 0;
-    let baseY = 0;
+let dragActive = false;
+let pointerId = null;
+let dragStartX = 0;
+let dragStartY = 0;
+let baseX = 0;
+let baseY = 0;
 
-    function getCurrentTransform(elem) {
-      const style = window.getComputedStyle(elem);
-      const matrix = new DOMMatrixReadOnly(style.transform);
-      return { x: matrix.m41, y: matrix.m42 };
-    }
+function getCurrentTransform(elem) {
+  const style = window.getComputedStyle(elem);
+  const matrix = new DOMMatrixReadOnly(style.transform);
+  return { x: matrix.m41, y: matrix.m42 };
+}
 
-    function resetDragPosition(immediate = false) {
-      const t = immediate ? "transform 0s" : "transform 0.25s ease";
-      dragCard.style.transition = t;
-      dragCard.style.transform = "translate(0px, 0px)";
-    }
+function resetDragPosition(immediate = false) {
+  dragCard.style.transition = immediate ? "transform 0s" : "transform 0.25s ease";
+  dragCard.style.transform = "translate(0px, 0px)";
+}
 
-    dragCard.addEventListener("pointerdown", (e) => {
-      if (!canDrag) return;
-      dragActive = true;
-      pointerId = e.pointerId;
-      dragCard.setPointerCapture(pointerId);
-      dragCard.style.pointerEvents = "auto";
-      const current = getCurrentTransform(dragCard);
-      baseX = current.x;
-      baseY = current.y;
-      dragStartX = e.clientX;
-      dragStartY = e.clientY;
-      dragCard.style.transition = "none";
-    });
+/* --------------------------------
+   POINTERDOWN
+--------------------------------*/
+dragCard.addEventListener("pointerdown", (e) => {
+  if (!canDrag) return;
 
-    dragCard.addEventListener("pointermove", (e) => {
-      if (!dragActive || e.pointerId !== pointerId) return;
-      const dx = e.clientX - dragStartX;
-      const dy = e.clientY - dragStartY;
-      dragCard.style.transform = `translate(${baseX + dx}px, ${baseY + dy}px)`;
-    });
+  dragActive = true;
+  pointerId = e.pointerId;
 
-    dragCard.addEventListener("pointerup", (e) => {
-      if (!dragActive || e.pointerId !== pointerId) return;
-      dragActive = false;
-      dragCard.releasePointerCapture(pointerId);
-      dragCard.style.pointerEvents = "auto";
-      handleDrop();
-    });
+  dragCard.setPointerCapture(pointerId);
 
-    function handleDrop() {
-      const dragRect = dragCard.getBoundingClientRect();
-      const optionCards = Array.from(
-        document.querySelectorAll(".option-card")
-      );
-      let hitCard = null;
-      let hitItem = null;
+  const current = getCurrentTransform(dragCard);
+  baseX = current.x;
+  baseY = current.y;
 
-      for (let i = 0; i < optionCards.length; i++) {
-        const card = optionCards[i];
-        const rect = card.getBoundingClientRect();
-        const overlap =
-          dragRect.right > rect.left &&
-          dragRect.left < rect.right &&
-          dragRect.bottom > rect.top &&
-          dragRect.top < rect.bottom;
-        if (overlap) {
-          hitCard = card;
-          hitItem = currentOptions[i];
-          break;
-        }
-      }
+  dragStartX = e.clientX;
+  dragStartY = e.clientY;
 
-      if (!hitCard || !hitItem) {
-        showWrongFeedback();
-        return;
-      }
+  dragCard.style.transition = "none";
 
-      if (hitItem.id === currentTarget.id) {
-        showCorrectFeedback(hitCard);
-      } else {
-        showWrongFeedback();
-      }
-    }
+  // ⭐ drag hissi için çok önemli
+  dragCard.style.cursor = "grabbing";
+  dragCard.style.pointerEvents = "auto";
+});
 
-    function showWrongFeedback() {
-      dragCard.classList.add("wrong");
-      canDrag = false;
-      setTimeout(() => {
-        dragCard.classList.remove("wrong");
-        resetDragPosition(false);
-        setTimeout(() => {
-          canDrag = true;
-        }, 260);
-      }, 260);
-    }
+/* --------------------------------
+   POINTERMOVE
+--------------------------------*/
+dragCard.addEventListener("pointermove", (e) => {
+  if (!dragActive || e.pointerId !== pointerId) return;
 
-    function showCorrectFeedback(targetCard) {
-      canDrag = false;
-      dragCard.classList.add("correct");
-      targetCard.classList.add("correct");
+  const dx = e.clientX - dragStartX;
+  const dy = e.clientY - dragStartY;
 
-      // Drag kartı hedef karta doğru yumuşak şekilde kaydır
-      const dragRect = dragCard.getBoundingClientRect();
-      const targetRect = targetCard.getBoundingClientRect();
-      const dx =
-        targetRect.left +
-        targetRect.width / 2 -
-        (dragRect.left + dragRect.width / 2);
-      const dy =
-        targetRect.top +
-        targetRect.height / 2 -
-        (dragRect.top + dragRect.height / 2);
+  dragCard.style.transform = `translate(${baseX + dx}px, ${baseY + dy}px)`;
+});
 
-      dragCard.style.transition = "transform 0.35s ease";
-      dragCard.style.transform = `translate(${dx}px, ${dy}px)`;
+/* --------------------------------
+   POINTERUP
+--------------------------------*/
+dragCard.addEventListener("pointerup", (e) => {
+  if (!dragActive || e.pointerId !== pointerId) return;
 
-      // Sembol kazanma
-      if (earnedSymbols < MAX_SYMBOLS) {
-        earnedSymbols++;
-        animateSymbolTransfer();
-        // Random aferin sesi
-        const voice =
-          successVoices[
-            Math.floor(Math.random() * successVoices.length)
-          ];
-        playSound(voice);
-      }
+  dragActive = false;
+  dragCard.releasePointerCapture(pointerId);
 
-      setTimeout(() => {
-        targetCard.classList.remove("correct");
-        dragCard.classList.remove("correct");
-        resetDragPosition(true);
+  dragCard.style.cursor = "grab";
+  dragCard.style.pointerEvents = "auto";
 
-        // Aynı nesne 2 kere doğru eşlensin
-        correctCountForItem++;
-        if (correctCountForItem < 2) {
-          // Aynı nesne, seçenekler karışsın
-          setupOptionsForSameItem(false);
-          canDrag = true;
-        } else {
-          // Yeni nesneye geç
-          setTimeout(() => {
-            setupNewRound();
-          }, 80);
-        }
-      }, 650);
-    }
+  handleDrop();
+});
+
+/* --------------------------------
+   POINTERCANCEL
+--------------------------------*/
+dragCard.addEventListener("pointercancel", () => {
+  dragActive = false;
+  dragCard.style.cursor = "grab";
+  dragCard.style.pointerEvents = "auto";
+  resetDragPosition(true);
+});
+
 
     // ---------------------------
     // BAŞLANGIÇ
