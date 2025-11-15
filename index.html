@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <title>Nesne Eşleme Oyunu - V27</title>
+  <title>Nesne Eşleme Oyunu - V30</title>
 
   <style>
     * {
@@ -26,7 +26,9 @@
       display: none !important;
     }
 
-    /* ========== MENÜ EKRANI ========== */
+    /* ======================
+       MENÜ EKRANI
+    ======================= */
 
     #menuScreen {
       width: 100%;
@@ -37,7 +39,7 @@
       align-items: center;
       background: radial-gradient(circle at top, #ffffffaa, transparent 60%),
                   linear-gradient(135deg, #4ea3ff, #8cd3ff);
-      z-index: 50;
+      z-index: 5;
     }
 
     .menu-card {
@@ -105,7 +107,9 @@
       color: #355;
     }
 
-    /* ========== OYUN EKRANI ========== */
+    /* ======================
+       OYUN EKRANI
+    ======================= */
 
     #gameScreen {
       width: 100%;
@@ -115,7 +119,7 @@
       z-index: 10;
     }
 
-    /* Üstte slider + ses */
+    /* Üst kontrol barı */
 
     #topControls {
       position: absolute;
@@ -126,6 +130,7 @@
       align-items: center;
       justify-content: space-between;
       z-index: 100;
+      pointer-events: auto;
     }
 
     #backSlider {
@@ -179,8 +184,7 @@
       color: #555;
     }
 
-    /* Yönerge kutusu */
-
+    /* Yönerge kutusu - altta, dragCard’ın altında kalacak */
     #instructionBox {
       position: absolute;
       left: 20px;
@@ -191,7 +195,8 @@
       background: rgba(255, 255, 255, 0.25);
       backdrop-filter: blur(4px);
       min-width: 180px;
-      z-index: 20; /* dragCard'ın altında */
+      z-index: 15; /* dragCard 50 olacak */
+      pointer-events: auto;
     }
 
     #instructionBox-title {
@@ -210,11 +215,11 @@
       font-weight: 700;
     }
 
-    /* Seçenek kartları (üst sıra) */
+    /* Üstteki seçenek kartları */
 
     #optionsRow {
       position: absolute;
-      top: 55px;      /* senin sevdiğin ayar */
+      top: 55px;              /* senin ayarın */
       left: 50%;
       transform: translateX(-50%);
       display: flex;
@@ -222,17 +227,25 @@
       justify-content: center;
       align-items: flex-start;
       z-index: 30;
+      pointer-events: none;   /* sadece içindeki kartlar tıklasın */
     }
 
-    /* Sürüklenen kart alanı */
+    #optionsRow .card {
+      pointer-events: auto;
+    }
+
+    /* Ortadaki sürüklenen kart alanı */
 
     #dragArea {
       position: absolute;
-      top: 355px;     /* senin sevdiğin ayar */
+      top: 355px;             /* senin ayarın */
       left: 50%;
       transform: translateX(-50%);
-      z-index: 40;    /* seçeneklerin üstünde */
+      z-index: 50;            /* her şeyin üstünde */
+      pointer-events: none;   /* sadece dragCard tıklasın */
     }
+
+    /* Kart ortak stil */
 
     .card {
       width: 150px;
@@ -276,7 +289,16 @@
       text-align: center;
     }
 
-    .option-card.correct {
+    /* Drag kartı özel */
+
+    #dragCard {
+      cursor: grab;
+      touch-action: none;
+      pointer-events: auto;   /* tıklama buna gelsin */
+      z-index: 999;           /* ekstra garanti */
+    }
+
+    .drag-card.correct {
       box-shadow: 0 0 0 3px #28a745, 0 10px 26px rgba(0, 0, 0, 0.25);
     }
 
@@ -284,15 +306,8 @@
       box-shadow: 0 0 0 3px #ff3b30, 0 10px 26px rgba(0, 0, 0, 0.25);
     }
 
-    .drag-card.correct {
+    .option-card.correct {
       box-shadow: 0 0 0 3px #28a745, 0 10px 26px rgba(0, 0, 0, 0.25);
-    }
-
-    .drag-card {
-      cursor: grab;
-      touch-action: none;
-      user-select: none;
-      z-index: 50; /* extra öncelik */
     }
 
     /* Sembol alanları */
@@ -306,7 +321,8 @@
       flex-direction: column;
       align-items: center;
       gap: 10px;
-      z-index: 5;
+      z-index: 8;
+      pointer-events: none;
     }
 
     #symbolBar {
@@ -317,6 +333,7 @@
       padding: 4px 10px;
       border-radius: 14px;
       background: rgba(255, 255, 255, 0.5);
+      pointer-events: auto;
     }
 
     #symbolBoard {
@@ -333,7 +350,8 @@
       justify-content: center;
       align-items: center;
       gap: 8px;
-      z-index: 5; /* dragCard'ın altında */
+      z-index: 8;
+      pointer-events: auto;
     }
 
     .symbol-star {
@@ -371,7 +389,7 @@
       position: fixed;
       font-size: 26px;
       pointer-events: none;
-      z-index: 999;
+      z-index: 9999;
       transition: transform 0.55s ease, opacity 0.55s ease;
     }
 
@@ -466,7 +484,9 @@
     <div id="dragArea">
       <div id="dragCard" class="card drag-card">
         <div class="card-title" id="dragTitle">NESNE</div>
-        <div class="card-image"><img id="dragImage" src="" alt=""></div>
+        <div class="card-image">
+          <img id="dragImage" src="" alt="Nesne">
+        </div>
         <div class="card-subtitle" id="dragSubtitle">Object</div>
       </div>
     </div>
@@ -481,7 +501,7 @@
   </div>
 <script>
 /* ============================================================
-    NESNE VERİLERİ
+   VERİLER (Nesne listesi)
 ============================================================ */
 
 const items = [
@@ -540,17 +560,17 @@ const items = [
 ];
 
 /* ============================================================
-    HTML REFERANSLARI
+   HTML ELEMENTLERİ
 ============================================================ */
 
 const menuScreen = document.getElementById("menuScreen");
 const gameScreen = document.getElementById("gameScreen");
-const optionsRow = document.getElementById("optionsRow");
-const dragArea = document.getElementById("dragArea");
-const dragCard = document.getElementById("dragCard");
 
-const dragTitle = document.getElementById("dragTitle");
+const optionsRow = document.getElementById("optionsRow");
+
+const dragCard = document.getElementById("dragCard");
 const dragImage = document.getElementById("dragImage");
+const dragTitle = document.getElementById("dragTitle");
 const dragSubtitle = document.getElementById("dragSubtitle");
 
 const symbolBar = document.getElementById("symbolBar");
@@ -560,30 +580,28 @@ const soundToggle = document.getElementById("soundToggle");
 const backKnob = document.getElementById("backKnob");
 const backSlider = document.getElementById("backSlider");
 
+/* ============================================================
+   DURUMLAR
+============================================================ */
+
 let currentChoices = 4;
 let currentTarget = null;
 let currentOptions = [];
 
-let canDrag = true;
-let correctRepeat = 0;
+let isDragging = false;
+let pointerId = null;
+
+let offsetX = 0;
+let offsetY = 0;
 
 let earnedSymbols = 0;
 const MAX_SYMBOLS = 8;
 
+let correctCount = 0;
 let soundEnabled = true;
 
 /* ============================================================
-    SESLER
-============================================================ */
-
-function playSound(audio) {
-  if (!soundEnabled) return;
-  audio.currentTime = 0;
-  audio.play().catch(()=>{});
-}
-
-/* ============================================================
-    MOD SEÇİMİ → OYUNA GEÇİŞ
+   MENÜ MODU
 ============================================================ */
 
 document.querySelectorAll(".mode-button").forEach(btn => {
@@ -593,149 +611,151 @@ document.querySelectorAll(".mode-button").forEach(btn => {
   });
 });
 
-function showGame(){
+function showGame() {
   menuScreen.classList.add("hidden");
   gameScreen.classList.remove("hidden");
+  earnedSymbols = 0;
+  updateSymbols();
   resetSlider();
   initSymbols();
   setupNewRound();
 }
 
-function showMenu(){
-  gameScreen.classList.add("hidden");
-  menuScreen.classList.remove("hidden");
-}
-
 /* ============================================================
-    MENÜYE DÖNME SLIDER
+   MENÜ SLIDER
 ============================================================ */
 
 let sliding = false;
-let slideStartX = 0;
-let knobStart = 0;
+let startX = 0;
+let knobStartX = 0;
 
-function resetSlider(){
+function resetSlider() {
   const W = backSlider.clientWidth;
   const K = backKnob.clientWidth;
-  backKnob.style.left = (W-K-8) + "px";
+  backKnob.style.left = (W - K - 8) + "px";
 }
 
 backKnob.addEventListener("pointerdown", e => {
   sliding = true;
   backKnob.setPointerCapture(e.pointerId);
-  slideStartX = e.clientX;
-  knobStart = backKnob.offsetLeft;
+  startX = e.clientX;
+  knobStartX = backKnob.offsetLeft;
 });
 
 backKnob.addEventListener("pointermove", e => {
-  if(!sliding) return;
-  const dx = e.clientX - slideStartX;
-  let newX = knobStart + dx;
-  if(newX < 8) newX = 8;
+  if (!sliding) return;
+
+  const dx = e.clientX - startX;
+  let newX = knobStartX + dx;
+
+  if (newX < 8) newX = 8;
+
   const maxX = backSlider.clientWidth - backKnob.clientWidth - 8;
-  if(newX > maxX) newX = maxX;
-  backKnob.style.left = newX+"px";
+  if (newX > maxX) newX = maxX;
+
+  backKnob.style.left = newX + "px";
 });
 
-backKnob.addEventListener("pointerup", (e)=>{
+backKnob.addEventListener("pointerup", e => {
   sliding = false;
   backKnob.releasePointerCapture(e.pointerId);
-  if(backKnob.offsetLeft < 20){
-    showMenu();
+
+  if (backKnob.offsetLeft < 20) {
+    gameScreen.classList.add("hidden");
+    menuScreen.classList.remove("hidden");
   }
+
   resetSlider();
 });
 
 /* ============================================================
-    SEMBOL SİSTEMİ
+   SEMBOL SİSTEMİ
 ============================================================ */
 
 let barStars = [];
 let boardStars = [];
 
-function initSymbols(){
+function initSymbols() {
   symbolBar.innerHTML = "";
   symbolBoard.innerHTML = "";
   barStars = [];
   boardStars = [];
 
-  for(let i=0; i<MAX_SYMBOLS; i++){
-    const bar = document.createElement("span");
-    bar.className = "symbol-star bar-star active";
-    bar.textContent = "⭐";
-    barStars.push(bar);
-    symbolBar.appendChild(bar);
+  for (let i = 0; i < MAX_SYMBOLS; i++) {
+    const a = document.createElement("span");
+    a.className = "symbol-star bar-star active";
+    a.textContent = "⭐";
+    barStars.push(a);
+    symbolBar.appendChild(a);
 
-    const bd = document.createElement("span");
-    bd.className = "symbol-star board-star";
-    bd.textContent = "⭐";
-    boardStars.push(bd);
-    symbolBoard.appendChild(bd);
+    const b = document.createElement("span");
+    b.className = "symbol-star board-star";
+    b.textContent = "⭐";
+    boardStars.push(b);
+    symbolBoard.appendChild(b);
   }
 }
 
-function updateSymbols(){
-  // bar
-  barStars.forEach((s,i)=>{
-    if(i < MAX_SYMBOLS - earnedSymbols) s.classList.add("active");
+function updateSymbols() {
+  barStars.forEach((s, i) => {
+    if (i < MAX_SYMBOLS - earnedSymbols) s.classList.add("active");
     else s.classList.remove("active");
   });
 
-  // board
-  boardStars.forEach((s,i)=>{
-    if(i < earnedSymbols) s.classList.add("filled");
+  boardStars.forEach((s, i) => {
+    if (i < earnedSymbols) s.classList.add("filled");
     else s.classList.remove("filled");
   });
 }
 
-function animateStar(){
-  const barRect = symbolBar.getBoundingClientRect();
-  const boardRect = symbolBoard.getBoundingClientRect();
+function animateStar() {
+  const barR = symbolBar.getBoundingClientRect();
+  const boardR = symbolBoard.getBoundingClientRect();
 
-  const sx = barRect.left + barRect.width/2;
-  const sy = barRect.top + barRect.height/2;
-  const ex = boardRect.left + boardRect.width/2;
-  const ey = boardRect.top + boardRect.height/2;
+  const sx = barR.left + barR.width / 2;
+  const sy = barR.top + barR.height / 2;
+  const ex = boardR.left + boardR.width / 2;
+  const ey = boardR.top + boardR.height / 2;
 
   const f = document.createElement("div");
   f.className = "floating-star";
   f.textContent = "⭐";
-  f.style.left = sx+"px";
-  f.style.top = sy+"px";
+  f.style.left = sx + "px";
+  f.style.top = sy + "px";
+
   document.body.appendChild(f);
 
-  requestAnimationFrame(()=>{
-    const dx = ex-sx;
-    const dy = ey-sy;
+  requestAnimationFrame(() => {
+    const dx = ex - sx;
+    const dy = ey - sy;
     f.style.transform = `translate(${dx}px, ${dy}px)`;
-    f.style.opacity = 0;
+    f.style.opacity = "0";
   });
 
-  setTimeout(()=>{
+  setTimeout(() => {
     f.remove();
     updateSymbols();
   }, 600);
 }
 
 /* ============================================================
-    OYUN MANTIĞI
+   OYUN MANTIĞI
 ============================================================ */
 
-function randomItem(){
-  return items[Math.floor(Math.random()*items.length)];
+function randomItem() {
+  return items[Math.floor(Math.random() * items.length)];
 }
 
-function shuffle(arr){
-  for(let i=arr.length-1; i>0; i--){
-    const j = Math.floor(Math.random()*(i+1));
-    [arr[i],arr[j]] = [arr[j],arr[i]];
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
   }
   return arr;
 }
 
-function setupNewRound(){
-  canDrag = true;
-  correctRepeat = 0;
+function setupNewRound() {
+  correctCount = 0;
   currentTarget = randomItem();
 
   dragTitle.textContent = currentTarget.tr;
@@ -746,103 +766,93 @@ function setupNewRound(){
   resetDragPosition(true);
 }
 
-function setupOptions(){
-  const others = shuffle(items.filter(i=>i.id !== currentTarget.id))
-                    .slice(0, currentChoices - 1);
-
+function setupOptions() {
+  const others = shuffle(items.filter(i => i.id !== currentTarget.id)).slice(0, currentChoices - 1);
   currentOptions = shuffle([currentTarget, ...others]);
 
   optionsRow.innerHTML = "";
-  currentOptions.forEach(item=>{
-    const c = document.createElement("div");
-    c.className = "card option-card";
-    c.dataset.id = item.id;
+  currentOptions.forEach(item => {
+    const card = document.createElement("div");
+    card.className = "card option-card";
+    card.dataset.id = item.id;
 
-    c.innerHTML = `
+    card.innerHTML = `
       <div class="card-title">${item.tr}</div>
-      <div class="card-image">
-        <img src="assets/${item.id}.png">
-      </div>
+      <div class="card-image"><img src="assets/${item.id}.png"></div>
       <div class="card-subtitle">${item.en}</div>
     `;
-    optionsRow.appendChild(c);
+
+    optionsRow.appendChild(card);
   });
 }
 
 /* ============================================================
-    DRAG & DROP (TAM DÜZELTİLMİŞ SÜRÜM)
+   DRAG & DROP – V30 (%100 STABİL)
 ============================================================ */
 
-let isDraggingCard = false;
-let activePointerId = null;
-
-let dragStartX = 0;
-let dragStartY = 0;
-
-let dragOffsetX = 0;
-let dragOffsetY = 0;
-
 dragCard.addEventListener("pointerdown", (e) => {
-  if (!canDrag) return;
-
-  isDraggingCard = true;
-  activePointerId = e.pointerId;
+  isDragging = true;
+  pointerId = e.pointerId;
+  dragCard.setPointerCapture(pointerId);
 
   const rect = dragCard.getBoundingClientRect();
-  dragStartX = e.clientX - rect.left;
-  dragStartY = e.clientY - rect.top;
+  offsetX = e.clientX - rect.left;
+  offsetY = e.clientY - rect.top;
 
-  dragCard.setPointerCapture(activePointerId);
   dragCard.style.transition = "none";
   dragCard.style.cursor = "grabbing";
 });
 
 dragCard.addEventListener("pointermove", (e) => {
-  if (!isDraggingCard || e.pointerId !== activePointerId) return;
+  if (!isDragging || e.pointerId !== pointerId) return;
 
-  const x = e.clientX - dragStartX;
-  const y = e.clientY - dragStartY;
+  const x = e.clientX - offsetX;
+  const y = e.clientY - offsetY;
 
   dragCard.style.transform = `translate(${x}px, ${y}px)`;
 });
 
-
 dragCard.addEventListener("pointerup", (e) => {
-  if (!isDraggingCard || e.pointerId !== activePointerId) return;
+  if (!isDragging || e.pointerId !== pointerId) return;
 
-  isDraggingCard = false;
-  dragCard.releasePointerCapture(activePointerId);
+  isDragging = false;
+  dragCard.releasePointerCapture(pointerId);
   dragCard.style.cursor = "grab";
 
   handleDrop();
 });
 
-/* DROPlama testi */
-function handleDrop(){
+/* ============================================================
+   DROPLAMA
+============================================================ */
+
+function handleDrop() {
   const dRect = dragCard.getBoundingClientRect();
 
   const optionCards = [...document.querySelectorAll(".option-card")];
   let hit = null;
 
-  for(let i = 0; i < optionCards.length; i++){
-    const rect = optionCards[i].getBoundingClientRect();
+  for (let c of optionCards) {
+    const r = c.getBoundingClientRect();
     const overlap =
-      dRect.right > rect.left &&
-      dRect.left < rect.right &&
-      dRect.bottom > rect.top &&
-      dRect.top < rect.bottom;
+      dRect.right > r.left &&
+      dRect.left < r.right &&
+      dRect.bottom > r.top &&
+      dRect.top < r.bottom;
 
-    if(overlap){
-      hit = optionCards[i];
+    if (overlap) {
+      hit = c;
       break;
     }
   }
 
-  if(!hit) return wrongFeedback();
+  if (!hit) {
+    return wrongFeedback();
+  }
 
-  const item = currentOptions.find(i=>i.id === hit.dataset.id);
+  const id = hit.dataset.id;
 
-  if(item.id === currentTarget.id){
+  if (id === currentTarget.id) {
     correctFeedback(hit);
   } else {
     wrongFeedback();
@@ -850,83 +860,68 @@ function handleDrop(){
 }
 
 /* ============================================================
-    GERİ BİLDİRİM
+   GERİ BİLDİRİM
 ============================================================ */
 
-function wrongFeedback(){
+function wrongFeedback() {
   dragCard.classList.add("wrong");
-  canDrag = false;
 
-  setTimeout(()=>{
+  setTimeout(() => {
     dragCard.classList.remove("wrong");
     resetDragPosition(false);
-    setTimeout(()=> canDrag = true, 260);
-  },260);
+  }, 260);
 }
 
-function correctFeedback(hit){
-  canDrag = false;
-
+function correctFeedback(hit) {
   dragCard.classList.add("correct");
   hit.classList.add("correct");
 
-  // kartı seçeneğin üstüne kaydır
   const d = dragCard.getBoundingClientRect();
   const o = hit.getBoundingClientRect();
 
-  const dx = (o.left + o.width/2) - (d.left + d.width/2);
-  const dy = (o.top  + o.height/2) - (d.top  + d.height/2);
+  const dx = (o.left + o.width / 2) - (d.left + d.width / 2);
+  const dy = (o.top + o.height / 2) - (d.top + d.height / 2);
 
   dragCard.style.transition = "transform 0.35s ease";
   dragCard.style.transform = `translate(${dx}px, ${dy}px)`;
 
-  if(earnedSymbols < MAX_SYMBOLS){
+  if (earnedSymbols < MAX_SYMBOLS) {
     earnedSymbols++;
     animateStar();
   }
 
-  setTimeout(()=>{
+  setTimeout(() => {
     hit.classList.remove("correct");
     dragCard.classList.remove("correct");
 
     resetDragPosition(true);
 
-    correctRepeat++;
-    if(correctRepeat < 2){
+    correctCount++;
+    if (correctCount < 2) {
       setupOptions();
-      canDrag = true;
     } else {
       setupNewRound();
     }
-  },650);
+  }, 650);
 }
 
 /* ============================================================
-    DRAG RESET
+   RESET
 ============================================================ */
 
-function resetDragPosition(immediate){
-  dragOffsetX = 0;
-  dragOffsetY = 0;
-
+function resetDragPosition(immediate) {
   dragCard.style.transition = immediate ? "transform 0s" : "transform 0.25s ease";
   dragCard.style.transform = "translate(0px, 0px)";
 }
 
 /* ============================================================
-    SES TUŞU
+   SES
 ============================================================ */
 
-soundToggle.addEventListener("click", ()=>{
+soundToggle.addEventListener("click", () => {
   soundEnabled = !soundEnabled;
   soundToggle.textContent = soundEnabled ? "🔊 Sesi Kapat" : "🔈 Sesi Aç";
 });
-
-/* ============================================================
-    BAŞLANGIÇ
-============================================================ */
-
-resetSlider();
 
 </script>
 </body>
