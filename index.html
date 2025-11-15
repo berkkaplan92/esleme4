@@ -1048,6 +1048,10 @@
 
     updateSoundToggle();
     // Başta menü görünecek, oyuna girince setupNewRound çağrılacak
+    document.addEventListener("pointerdown", (e) => {
+  console.log("Tıklanan:", e.target.id || e.target.className);
+});
+
   </script>
 </body>
 </html>
