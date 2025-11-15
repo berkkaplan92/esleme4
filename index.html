@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <title>Nesne Eşleme Oyunu - V26</title>
+  <title>Nesne Eşleme Oyunu - V27</title>
 
   <style>
     * {
@@ -26,9 +26,7 @@
       display: none !important;
     }
 
-    /* ---------------------------
-       MENÜ EKRANI
-    ---------------------------- */
+    /* ========== MENÜ EKRANI ========== */
 
     #menuScreen {
       width: 100%;
@@ -39,7 +37,7 @@
       align-items: center;
       background: radial-gradient(circle at top, #ffffffaa, transparent 60%),
                   linear-gradient(135deg, #4ea3ff, #8cd3ff);
-      z-index: 1;
+      z-index: 50;
     }
 
     .menu-card {
@@ -82,11 +80,18 @@
       background: linear-gradient(135deg, #4da3ff, #6cc6ff);
       color: #fff;
       box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
-      transition: transform 0.12s ease, box-shadow 0.12s ease;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 6px;
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+    }
+
+    .mode-button span.badge {
+      background: rgba(255, 255, 255, 0.22);
+      padding: 2px 10px;
+      border-radius: 999px;
+      font-size: 13px;
     }
 
     .mode-button:hover {
@@ -100,19 +105,18 @@
       color: #355;
     }
 
-    /* ---------------------------
-       OYUN EKRANI
-    ---------------------------- */
+    /* ========== OYUN EKRANI ========== */
 
     #gameScreen {
       width: 100%;
       height: 100%;
       position: relative;
       padding: 10px 28px 18px 28px;
-      z-index: 1;
+      z-index: 10;
     }
 
-    /* Menüye dön slider */
+    /* Üstte slider + ses */
+
     #topControls {
       position: absolute;
       top: 10px;
@@ -121,7 +125,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      z-index: 10;
+      z-index: 100;
     }
 
     #backSlider {
@@ -134,7 +138,6 @@
       padding: 0 8px;
       display: flex;
       align-items: center;
-      z-index: 10;
     }
 
     #backSliderText {
@@ -153,24 +156,30 @@
       background: radial-gradient(circle at 30% 30%, #fff, #3fa2ff);
       box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
       cursor: grab;
-      z-index: 10;
     }
 
     #soundToggle {
       margin-left: 18px;
       padding: 6px 18px;
       border-radius: 999px;
-      background: #ffb74d;
       border: none;
-      font-size: 13px;
+      background: #ffb74d;
+      color: #222;
+      font-weight: 600;
       cursor: pointer;
       box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
-      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 13px;
     }
 
-    /* ---------------------------
-       YÖNERGE KUTUSU
-    ---------------------------- */
+    #soundToggle.muted {
+      background: #ddd;
+      color: #555;
+    }
+
+    /* Yönerge kutusu */
 
     #instructionBox {
       position: absolute;
@@ -182,61 +191,76 @@
       background: rgba(255, 255, 255, 0.25);
       backdrop-filter: blur(4px);
       min-width: 180px;
-      z-index: 2 !important; /* Artık dragCard'ın altında */
+      z-index: 20; /* dragCard'ın altında */
     }
 
     #instructionBox-title {
-      font-size: 15px;
       font-weight: 800;
       margin-bottom: 4px;
+      font-size: 15px;
     }
 
-    /* ---------------------------
-       SEÇENEK KARTLARI (ÜST)
-    ---------------------------- */
+    #instructionBox ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    #instructionBox li {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    /* Seçenek kartları (üst sıra) */
 
     #optionsRow {
       position: absolute;
-      top: 55px;
+      top: 55px;      /* senin sevdiğin ayar */
       left: 50%;
       transform: translateX(-50%);
       display: flex;
       gap: 32px;
-      z-index: 50;
+      justify-content: center;
+      align-items: flex-start;
+      z-index: 30;
     }
 
-    /* ---------------------------
-       DRAG KARTI (MERKEZ)
-    ---------------------------- */
+    /* Sürüklenen kart alanı */
 
     #dragArea {
       position: absolute;
-      top: 355px;
+      top: 355px;     /* senin sevdiğin ayar */
       left: 50%;
       transform: translateX(-50%);
-      z-index: 999999 !important;  /* en önde */
+      z-index: 40;    /* seçeneklerin üstünde */
     }
 
-    #dragCard {
+    .card {
       width: 150px;
       height: 230px;
       border-radius: 20px;
       background: #fff;
-      box-shadow: 0 10px 26px rgba(0,0,0,0.25);
+      box-shadow: 0 10px 26px rgba(0, 0, 0, 0.25);
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 10px;
+      padding: 10px 10px 14px 10px;
       user-select: none;
-      cursor: grab;
-      touch-action: none;
-      z-index: 9999999 !important; /* EN ÖNDE */
+      position: relative;
     }
 
     .card-title {
       font-size: 16px;
       font-weight: 800;
       margin-bottom: 4px;
+      text-align: center;
+    }
+
+    .card-image {
+      flex: 1;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .card-image img {
@@ -245,102 +269,188 @@
       object-fit: contain;
     }
 
-    /* ---------------------------
-       SEMBOL BAR + BOARD (ALTA)
-    ---------------------------- */
+    .card-subtitle {
+      font-size: 14px;
+      margin-top: 4px;
+      color: #444;
+      text-align: center;
+    }
+
+    .option-card.correct {
+      box-shadow: 0 0 0 3px #28a745, 0 10px 26px rgba(0, 0, 0, 0.25);
+    }
+
+    .drag-card.wrong {
+      box-shadow: 0 0 0 3px #ff3b30, 0 10px 26px rgba(0, 0, 0, 0.25);
+    }
+
+    .drag-card.correct {
+      box-shadow: 0 0 0 3px #28a745, 0 10px 26px rgba(0, 0, 0, 0.25);
+    }
+
+    .drag-card {
+      cursor: grab;
+      touch-action: none;
+      user-select: none;
+      z-index: 50; /* extra öncelik */
+    }
+
+    /* Sembol alanları */
 
     #symbolsWrapper {
       position: absolute;
       bottom: 12px;
       left: 50%;
       transform: translateX(-50%);
-      z-index: 1 !important; 
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      z-index: 5;
     }
 
     #symbolBar {
       display: flex;
+      justify-content: center;
+      align-items: center;
       gap: 4px;
       padding: 4px 10px;
-      background: rgba(255,255,255,0.5);
       border-radius: 14px;
-      z-index: 1 !important;
+      background: rgba(255, 255, 255, 0.5);
     }
 
     #symbolBoard {
       position: absolute;
       right: 40px;
       bottom: 30px;
-      width: 350px;
+      width: 360px;
       height: 110px;
-      background: rgba(255,255,255,0.5);
       border-radius: 16px;
-      box-shadow: inset 0 0 0 2px rgba(255,255,255,0.5);
+      background: rgba(255, 255, 255, 0.5);
+      box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.5),
+                  0 8px 18px rgba(0, 0, 0, 0.18);
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 6px;
-      z-index: 1 !important; /* Alta çekildi */
+      gap: 8px;
+      z-index: 5; /* dragCard'ın altında */
     }
 
     .symbol-star {
-      font-size: 26px;
+      font-size: 24px;
+      transition: transform 0.25s ease, opacity 0.25s ease;
       user-select: none;
     }
 
-    /* ------------ END STYLE ------------ */
+    .bar-star {
+      color: #ffcc80;
+      opacity: 0.4;
+    }
+
+    .bar-star.active {
+      opacity: 1;
+      color: #ffb300;
+    }
+
+    .board-star {
+      color: #ff9800;
+      opacity: 0.2;
+      cursor: default;
+      font-size: 32px;
+    }
+
+    .board-star.filled {
+      opacity: 1;
+    }
+
+    .board-star.clickable {
+      cursor: pointer;
+    }
+
+    .floating-star {
+      position: fixed;
+      font-size: 26px;
+      pointer-events: none;
+      z-index: 999;
+      transition: transform 0.55s ease, opacity 0.55s ease;
+    }
+
+    @media (max-width: 900px) {
+      #optionsRow {
+        gap: 18px;
+      }
+      .card {
+        width: 130px;
+        height: 210px;
+      }
+      #symbolBoard {
+        right: 16px;
+      }
+      #instructionBox {
+        left: 14px;
+        bottom: 16px;
+      }
+    }
   </style>
 </head>
-  <body>
-  <!-- MENÜ EKRANI -->
+<body>
+
+  <!-- ========== MENÜ EKRANI ========== -->
   <div id="menuScreen">
     <div class="menu-card">
-      <div class="menu-title">
-        🎯 NESNE EŞLEME OYUNU
-      </div>
+      <div class="menu-title">🎯 NESNE EŞLEME OYUNU</div>
       <p class="menu-subtitle">Bir eşleme modu seç ve oyuna başla!</p>
 
       <button class="mode-button" data-choices="1">
         1 Seçenekli Eşleme
         <span class="badge">Başlangıç</span>
       </button>
+
       <button class="mode-button" data-choices="2">
         2 Seçenekli Eşleme
         <span class="badge">Kolay</span>
       </button>
+
       <button class="mode-button" data-choices="3">
         3 Seçenekli Eşleme
         <span class="badge">Orta</span>
       </button>
+
       <button class="mode-button" data-choices="4">
         4 Seçenekli Eşleme
         <span class="badge">Önerilen</span>
       </button>
+
       <button class="mode-button" data-choices="5">
         5 Seçenekli Eşleme
         <span class="badge">Zor</span>
       </button>
+
       <button class="mode-button" data-choices="7">
         7 Seçenekli Eşleme
         <span class="badge">Uzman</span>
       </button>
 
       <div class="menu-footer">
-        Powered by Pika &amp; Berk 🌟
+        <span>Powered by</span> Pika & Berk 🌟
       </div>
     </div>
   </div>
 
-  <!-- OYUN EKRANI -->
+  <!-- ========== OYUN EKRANI ========== -->
   <div id="gameScreen" class="hidden">
+
+    <!-- Üst Kontroller -->
     <div id="topControls">
       <div id="backSlider">
         <span id="backSliderText">MENÜYE DÖNMEK İÇİN SÜRÜKLE ←</span>
         <div id="backKnob"></div>
       </div>
+
       <button id="soundToggle">🔊 Sesi Kapat</button>
     </div>
 
-    <!-- Yönerge kutusu -->
+    <!-- Yönerge -->
     <div id="instructionBox">
       <div id="instructionBox-title">YÖNERGE :</div>
       <ul>
@@ -349,572 +459,480 @@
       </ul>
     </div>
 
-    <!-- Seçenek kartları -->
+    <!-- Üstteki seçenek kartları -->
     <div id="optionsRow"></div>
 
-    <!-- Sürüklenen kart -->
+    <!-- Ortadaki sürüklenen kart -->
     <div id="dragArea">
-      <div id="dragCard">
-        <div class="card-title" id="dragTitle">ELMA</div>
-        <div class="card-image">
-          <img id="dragImage" src="" alt="Nesne" />
-        </div>
-        <div class="card-subtitle" id="dragSubtitle">Apple</div>
+      <div id="dragCard" class="card drag-card">
+        <div class="card-title" id="dragTitle">NESNE</div>
+        <div class="card-image"><img id="dragImage" src="" alt=""></div>
+        <div class="card-subtitle" id="dragSubtitle">Object</div>
       </div>
     </div>
 
-    <!-- Sembol barı + sembol tahtası -->
+    <!-- Semboller -->
     <div id="symbolsWrapper">
       <div id="symbolBar"></div>
     </div>
+
     <div id="symbolBoard"></div>
+
   </div>
+<script>
+/* ============================================================
+    NESNE VERİLERİ
+============================================================ */
 
-  <script>
-    // ---------------------------
-    // VERİLER
-    // ---------------------------
-    const items = [
-      // Meyveler
-      { id: "elma", tr: "ELMA", en: "Apple" },
-      { id: "armut", tr: "ARMUT", en: "Pear" },
-      { id: "muz", tr: "MUZ", en: "Banana" },
-      { id: "uzum", tr: "ÜZÜM", en: "Grapes" },
-      { id: "ananas", tr: "ANANAS", en: "Pineapple" },
-      { id: "cilek", tr: "ÇİLEK", en: "Strawberry" },
-      { id: "karpuz", tr: "KARPUZ", en: "Watermelon" },
-      { id: "kavun", tr: "KAVUN", en: "Melon" },
-      { id: "portakal", tr: "PORTAKAL", en: "Orange" },
-      { id: "kivi", tr: "KİVİ", en: "Kiwi" },
+const items = [
+  { id: "elma", tr: "ELMA", en: "Apple" },
+  { id: "armut", tr: "ARMUT", en: "Pear" },
+  { id: "muz", tr: "MUZ", en: "Banana" },
+  { id: "uzum", tr: "ÜZÜM", en: "Grapes" },
+  { id: "ananas", tr: "ANANAS", en: "Pineapple" },
+  { id: "cilek", tr: "ÇİLEK", en: "Strawberry" },
+  { id: "karpuz", tr: "KARPUZ", en: "Watermelon" },
+  { id: "kavun", tr: "KAVUN", en: "Melon" },
+  { id: "portakal", tr: "PORTAKAL", en: "Orange" },
+  { id: "kivi", tr: "KİVİ", en: "Kiwi" },
 
-      // Sebzeler
-      { id: "domates", tr: "DOMATES", en: "Tomato" },
-      { id: "salatalik", tr: "SALATALIK", en: "Cucumber" },
-      { id: "biber", tr: "BİBER", en: "Pepper" },
-      { id: "sarimsak", tr: "SARIMSAK", en: "Garlic" },
-      { id: "sogan", tr: "SOĞAN", en: "Onion" },
-      { id: "brokoli", tr: "BROKOLİ", en: "Broccoli" },
-      { id: "havuc", tr: "HAVUÇ", en: "Carrot" },
-      { id: "lahana", tr: "LAHANA", en: "Cabbage" },
-      { id: "misir", tr: "MISIR", en: "Corn" },
-      { id: "patlican", tr: "PATLICAN", en: "Eggplant" },
+  { id: "domates", tr: "DOMATES", en: "Tomato" },
+  { id: "salatalik", tr: "SALATALIK", en: "Cucumber" },
+  { id: "biber", tr: "BİBER", en: "Pepper" },
+  { id: "sarimsak", tr: "SARIMSAK", en: "Garlic" },
+  { id: "sogan", tr: "SOĞAN", en: "Onion" },
+  { id: "brokoli", tr: "BROKOLİ", en: "Broccoli" },
+  { id: "havuc", tr: "HAVUÇ", en: "Carrot" },
+  { id: "lahana", tr: "LAHANA", en: "Cabbage" },
+  { id: "misir", tr: "MISIR", en: "Corn" },
+  { id: "patlican", tr: "PATLICAN", en: "Eggplant" },
 
-      // Taşıtlar
-      { id: "araba", tr: "ARABA", en: "Car" },
-      { id: "kamyon", tr: "KAMYON", en: "Truck" },
-      { id: "motosiklet", tr: "MOTOSİKLET", en: "Motorcycle" },
-      { id: "bisiklet", tr: "BİSİKLET", en: "Bicycle" },
-      { id: "gemi", tr: "GEMİ", en: "Ship" },
-      { id: "helikopter", tr: "HELİKOPTER", en: "Helicopter" },
-      { id: "ucak", tr: "UÇAK", en: "Airplane" },
-      { id: "tren", tr: "TREN", en: "Train" },
-      { id: "otobus", tr: "OTOBÜS", en: "Bus" },
-      { id: "itfaiye_araci", tr: "İTFAİYE", en: "Fire Truck" },
+  { id: "araba", tr: "ARABA", en: "Car" },
+  { id: "kamyon", tr: "KAMYON", en: "Truck" },
+  { id: "motosiklet", tr: "MOTOSİKLET", en: "Motorcycle" },
+  { id: "bisiklet", tr: "BİSİKLET", en: "Bicycle" },
+  { id: "gemi", tr: "GEMİ", en: "Ship" },
+  { id: "helikopter", tr: "HELİKOPTER", en: "Helicopter" },
+  { id: "ucak", tr: "UÇAK", en: "Airplane" },
+  { id: "tren", tr: "TREN", en: "Train" },
+  { id: "otobus", tr: "OTOBÜS", en: "Bus" },
+  { id: "itfaiye_araci", tr: "İTFAİYE", en: "Fire Truck" },
 
-      // Hayvanlar
-      { id: "aslan", tr: "ASLAN", en: "Lion" },
-      { id: "kedi", tr: "KEDİ", en: "Cat" },
-      { id: "kopek", tr: "KÖPEK", en: "Dog" },
-      { id: "fil", tr: "FİL", en: "Elephant" },
-      { id: "kurbaga", tr: "KURBAĞA", en: "Frog" },
-      { id: "yunus", tr: "YUNUS", en: "Dolphin" },
-      { id: "kus", tr: "KUŞ", en: "Bird" },
-      { id: "ayi", tr: "AYI", en: "Bear" },
-      { id: "tavsan", tr: "TAVŞAN", en: "Rabbit" },
-      { id: "inek", tr: "İNEK", en: "Cow" },
-      { id: "koyun", tr: "KOYUN", en: "Sheep" },
-      { id: "at", tr: "AT", en: "Horse" },
-      { id: "kaplumbaga", tr: "KAPLUMBAĞA", en: "Turtle" },
-      { id: "tavuk", tr: "TAVUK", en: "Chicken" },
-      { id: "domuz", tr: "DOMUZ", en: "Pig" },
-      { id: "ordek", tr: "ÖRDEK", en: "Duck" },
-      { id: "balik", tr: "BALIK", en: "Fish" },
-      { id: "kaplan", tr: "KAPLAN", en: "Tiger" },
-      { id: "maymun", tr: "MAYMUN", en: "Monkey" },
-      { id: "keci", tr: "KEÇİ", en: "Goat" }
-    ];
+  { id: "aslan", tr: "ASLAN", en: "Lion" },
+  { id: "kedi", tr: "KEDİ", en: "Cat" },
+  { id: "kopek", tr: "KÖPEK", en: "Dog" },
+  { id: "fil", tr: "FİL", en: "Elephant" },
+  { id: "kurbaga", tr: "KURBAĞA", en: "Frog" },
+  { id: "yunus", tr: "YUNUS", en: "Dolphin" },
+  { id: "kus", tr: "KUŞ", en: "Bird" },
+  { id: "ayi", tr: "AYI", en: "Bear" },
+  { id: "tavsan", tr: "TAVŞAN", en: "Rabbit" },
+  { id: "inek", tr: "İNEK", en: "Cow" },
+  { id: "koyun", tr: "KOYUN", en: "Sheep" },
+  { id: "at", tr: "AT", en: "Horse" },
+  { id: "kaplumbaga", tr: "KAPLUMBAĞA", en: "Turtle" },
+  { id: "tavuk", tr: "TAVUK", en: "Chicken" },
+  { id: "ordek", tr: "ÖRDEK", en: "Duck" },
+  { id: "balik", tr: "BALIK", en: "Fish" },
+  { id: "kaplan", tr: "KAPLAN", en: "Tiger" },
+  { id: "maymun", tr: "MAYMUN", en: "Monkey" },
+  { id: "keci", tr: "KEÇİ", en: "Goat" }
+];
 
-    // ---------------------------
-    // DOM REFERANSLARI
-    // ---------------------------
-    const menuScreen = document.getElementById("menuScreen");
-    const gameScreen = document.getElementById("gameScreen");
-    const optionsRow = document.getElementById("optionsRow");
-    const dragArea = document.getElementById("dragArea");
-    const dragCard = document.getElementById("dragCard");
-    const dragTitle = document.getElementById("dragTitle");
-    const dragImage = document.getElementById("dragImage");
-    const dragSubtitle = document.getElementById("dragSubtitle");
-    const symbolBar = document.getElementById("symbolBar");
-    const symbolBoard = document.getElementById("symbolBoard");
-    const soundToggle = document.getElementById("soundToggle");
-    const backKnob = document.getElementById("backKnob");
-    const backSlider = document.getElementById("backSlider");
+/* ============================================================
+    HTML REFERANSLARI
+============================================================ */
 
-    const MAX_SYMBOLS = 8;
-    let currentChoices = 4;
-    let currentTarget = null;
-    let currentOptions = [];
-    let canDrag = true;
-    let correctCountForItem = 0;
-    let earnedSymbols = 0;
-    let soundEnabled = true;
+const menuScreen = document.getElementById("menuScreen");
+const gameScreen = document.getElementById("gameScreen");
+const optionsRow = document.getElementById("optionsRow");
+const dragArea = document.getElementById("dragArea");
+const dragCard = document.getElementById("dragCard");
 
-    // SESLER (dosyaları "assets/sounds" klasörüne koy)
-    const successVoices = [
-      new Audio("assets/sounds/success1.mp3"),
-      new Audio("assets/sounds/success2.mp3"),
-      new Audio("assets/sounds/success3.mp3"),
-      new Audio("assets/sounds/success4.mp3")
-    ];
+const dragTitle = document.getElementById("dragTitle");
+const dragImage = document.getElementById("dragImage");
+const dragSubtitle = document.getElementById("dragSubtitle");
 
-    const countVoices = [
-      new Audio("assets/sounds/1.mp3"),
-      new Audio("assets/sounds/2.mp3"),
-      new Audio("assets/sounds/3.mp3"),
-      new Audio("assets/sounds/4.mp3"),
-      new Audio("assets/sounds/5.mp3"),
-      new Audio("assets/sounds/6.mp3"),
-      new Audio("assets/sounds/7.mp3"),
-      new Audio("assets/sounds/8.mp3")
-    ];
+const symbolBar = document.getElementById("symbolBar");
+const symbolBoard = document.getElementById("symbolBoard");
 
-    const allDoneVoice = new Audio("assets/sounds/all_done.mp3");
+const soundToggle = document.getElementById("soundToggle");
+const backKnob = document.getElementById("backKnob");
+const backSlider = document.getElementById("backSlider");
 
-    function playSound(audio) {
-      if (!soundEnabled || !audio) return;
-      audio.currentTime = 0;
-      audio.play().catch(() => {});
+let currentChoices = 4;
+let currentTarget = null;
+let currentOptions = [];
+
+let canDrag = true;
+let correctRepeat = 0;
+
+let earnedSymbols = 0;
+const MAX_SYMBOLS = 8;
+
+let soundEnabled = true;
+
+/* ============================================================
+    SESLER
+============================================================ */
+
+function playSound(audio) {
+  if (!soundEnabled) return;
+  audio.currentTime = 0;
+  audio.play().catch(()=>{});
+}
+
+/* ============================================================
+    MOD SEÇİMİ → OYUNA GEÇİŞ
+============================================================ */
+
+document.querySelectorAll(".mode-button").forEach(btn => {
+  btn.addEventListener("click", () => {
+    currentChoices = parseInt(btn.dataset.choices);
+    showGame();
+  });
+});
+
+function showGame(){
+  menuScreen.classList.add("hidden");
+  gameScreen.classList.remove("hidden");
+  resetSlider();
+  initSymbols();
+  setupNewRound();
+}
+
+function showMenu(){
+  gameScreen.classList.add("hidden");
+  menuScreen.classList.remove("hidden");
+}
+
+/* ============================================================
+    MENÜYE DÖNME SLIDER
+============================================================ */
+
+let sliding = false;
+let slideStartX = 0;
+let knobStart = 0;
+
+function resetSlider(){
+  const W = backSlider.clientWidth;
+  const K = backKnob.clientWidth;
+  backKnob.style.left = (W-K-8) + "px";
+}
+
+backKnob.addEventListener("pointerdown", e => {
+  sliding = true;
+  backKnob.setPointerCapture(e.pointerId);
+  slideStartX = e.clientX;
+  knobStart = backKnob.offsetLeft;
+});
+
+backKnob.addEventListener("pointermove", e => {
+  if(!sliding) return;
+  const dx = e.clientX - slideStartX;
+  let newX = knobStart + dx;
+  if(newX < 8) newX = 8;
+  const maxX = backSlider.clientWidth - backKnob.clientWidth - 8;
+  if(newX > maxX) newX = maxX;
+  backKnob.style.left = newX+"px";
+});
+
+backKnob.addEventListener("pointerup", (e)=>{
+  sliding = false;
+  backKnob.releasePointerCapture(e.pointerId);
+  if(backKnob.offsetLeft < 20){
+    showMenu();
+  }
+  resetSlider();
+});
+
+/* ============================================================
+    SEMBOL SİSTEMİ
+============================================================ */
+
+let barStars = [];
+let boardStars = [];
+
+function initSymbols(){
+  symbolBar.innerHTML = "";
+  symbolBoard.innerHTML = "";
+  barStars = [];
+  boardStars = [];
+
+  for(let i=0; i<MAX_SYMBOLS; i++){
+    const bar = document.createElement("span");
+    bar.className = "symbol-star bar-star active";
+    bar.textContent = "⭐";
+    barStars.push(bar);
+    symbolBar.appendChild(bar);
+
+    const bd = document.createElement("span");
+    bd.className = "symbol-star board-star";
+    bd.textContent = "⭐";
+    boardStars.push(bd);
+    symbolBoard.appendChild(bd);
+  }
+}
+
+function updateSymbols(){
+  // bar
+  barStars.forEach((s,i)=>{
+    if(i < MAX_SYMBOLS - earnedSymbols) s.classList.add("active");
+    else s.classList.remove("active");
+  });
+
+  // board
+  boardStars.forEach((s,i)=>{
+    if(i < earnedSymbols) s.classList.add("filled");
+    else s.classList.remove("filled");
+  });
+}
+
+function animateStar(){
+  const barRect = symbolBar.getBoundingClientRect();
+  const boardRect = symbolBoard.getBoundingClientRect();
+
+  const sx = barRect.left + barRect.width/2;
+  const sy = barRect.top + barRect.height/2;
+  const ex = boardRect.left + boardRect.width/2;
+  const ey = boardRect.top + boardRect.height/2;
+
+  const f = document.createElement("div");
+  f.className = "floating-star";
+  f.textContent = "⭐";
+  f.style.left = sx+"px";
+  f.style.top = sy+"px";
+  document.body.appendChild(f);
+
+  requestAnimationFrame(()=>{
+    const dx = ex-sx;
+    const dy = ey-sy;
+    f.style.transform = `translate(${dx}px, ${dy}px)`;
+    f.style.opacity = 0;
+  });
+
+  setTimeout(()=>{
+    f.remove();
+    updateSymbols();
+  }, 600);
+}
+
+/* ============================================================
+    OYUN MANTIĞI
+============================================================ */
+
+function randomItem(){
+  return items[Math.floor(Math.random()*items.length)];
+}
+
+function shuffle(arr){
+  for(let i=arr.length-1; i>0; i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]] = [arr[j],arr[i]];
+  }
+  return arr;
+}
+
+function setupNewRound(){
+  canDrag = true;
+  correctRepeat = 0;
+  currentTarget = randomItem();
+
+  dragTitle.textContent = currentTarget.tr;
+  dragSubtitle.textContent = currentTarget.en;
+  dragImage.src = `assets/${currentTarget.id}.png`;
+
+  setupOptions();
+  resetDragPosition(true);
+}
+
+function setupOptions(){
+  const others = shuffle(items.filter(i=>i.id !== currentTarget.id))
+                    .slice(0, currentChoices - 1);
+
+  currentOptions = shuffle([currentTarget, ...others]);
+
+  optionsRow.innerHTML = "";
+  currentOptions.forEach(item=>{
+    const c = document.createElement("div");
+    c.className = "card option-card";
+    c.dataset.id = item.id;
+
+    c.innerHTML = `
+      <div class="card-title">${item.tr}</div>
+      <div class="card-image">
+        <img src="assets/${item.id}.png">
+      </div>
+      <div class="card-subtitle">${item.en}</div>
+    `;
+    optionsRow.appendChild(c);
+  });
+}
+
+/* ============================================================
+    DRAG & DROP (TAM DÜZELTİLMİŞ SÜRÜM)
+============================================================ */
+
+let isDraggingCard = false;
+let activePointerId = null;
+
+let dragStartX = 0;
+let dragStartY = 0;
+
+let dragOffsetX = 0;
+let dragOffsetY = 0;
+
+dragCard.addEventListener("pointerdown", (e)=>{
+  if(!canDrag) return;
+
+  isDraggingCard = true;
+  activePointerId = e.pointerId;
+
+  // ⭐ EN ÖNEMLİ FİX:
+  dragOffsetX = 0;
+  dragOffsetY = 0;
+
+  dragCard.setPointerCapture(activePointerId);
+  dragCard.style.transition = "none";
+  dragCard.style.cursor = "grabbing";
+
+  dragStartX = e.clientX;
+  dragStartY = e.clientY;
+});
+
+dragCard.addEventListener("pointermove", (e)=>{
+  if(!isDraggingCard || e.pointerId !== activePointerId) return;
+
+  const dx = e.clientX - dragStartX;
+  const dy = e.clientY - dragStartY;
+
+  dragOffsetX = dx;
+  dragOffsetY = dy;
+
+  dragCard.style.transform = `translate(${dragOffsetX}px, ${dragOffsetY}px)`;
+});
+
+dragCard.addEventListener("pointerup", (e)=>{
+  if(!isDraggingCard || e.pointerId !== activePointerId) return;
+
+  isDraggingCard = false;
+  dragCard.releasePointerCapture(activePointerId);
+  dragCard.style.cursor = "grab";
+
+  handleDrop();
+});
+
+/* DROPlama testi */
+function handleDrop(){
+  const dRect = dragCard.getBoundingClientRect();
+
+  const optionCards = [...document.querySelectorAll(".option-card")];
+  let hit = null;
+
+  for(let i = 0; i < optionCards.length; i++){
+    const rect = optionCards[i].getBoundingClientRect();
+    const overlap =
+      dRect.right > rect.left &&
+      dRect.left < rect.right &&
+      dRect.bottom > rect.top &&
+      dRect.top < rect.bottom;
+
+    if(overlap){
+      hit = optionCards[i];
+      break;
     }
+  }
 
-    function updateSoundToggle() {
-      if (soundEnabled) {
-        soundToggle.classList.remove("muted");
-        soundToggle.textContent = "🔊 Sesi Kapat";
-      } else {
-        soundToggle.classList.add("muted");
-        soundToggle.textContent = "🔈 Sesi Aç";
-      }
-    }
-    soundToggle.addEventListener("click", () => {
-      soundEnabled = !soundEnabled;
-      updateSoundToggle();
-    });
+  if(!hit) return wrongFeedback();
 
-    // ---------------------------
-    // MENÜ MOD SEÇİMİ
-    // ---------------------------
-    document.querySelectorAll(".mode-button").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const ch = parseInt(btn.dataset.choices, 10) || 4;
-        currentChoices = ch;
-        showGameScreen();
-      });
-    });
+  const item = currentOptions.find(i=>i.id === hit.dataset.id);
 
-    function showGameScreen() {
-      menuScreen.classList.add("hidden");
-      gameScreen.classList.remove("hidden");
-      resetSlider();
-      initSymbols();
-      earnedSymbols = 0;
-      updateSymbols();
+  if(item.id === currentTarget.id){
+    correctFeedback(hit);
+  } else {
+    wrongFeedback();
+  }
+}
+
+/* ============================================================
+    GERİ BİLDİRİM
+============================================================ */
+
+function wrongFeedback(){
+  dragCard.classList.add("wrong");
+  canDrag = false;
+
+  setTimeout(()=>{
+    dragCard.classList.remove("wrong");
+    resetDragPosition(false);
+    setTimeout(()=> canDrag = true, 260);
+  },260);
+}
+
+function correctFeedback(hit){
+  canDrag = false;
+
+  dragCard.classList.add("correct");
+  hit.classList.add("correct");
+
+  // kartı seçeneğin üstüne kaydır
+  const d = dragCard.getBoundingClientRect();
+  const o = hit.getBoundingClientRect();
+
+  const dx = (o.left + o.width/2) - (d.left + d.width/2);
+  const dy = (o.top  + o.height/2) - (d.top  + d.height/2);
+
+  dragCard.style.transition = "transform 0.35s ease";
+  dragCard.style.transform = `translate(${dx}px, ${dy}px)`;
+
+  if(earnedSymbols < MAX_SYMBOLS){
+    earnedSymbols++;
+    animateStar();
+  }
+
+  setTimeout(()=>{
+    hit.classList.remove("correct");
+    dragCard.classList.remove("correct");
+
+    resetDragPosition(true);
+
+    correctRepeat++;
+    if(correctRepeat < 2){
+      setupOptions();
+      canDrag = true;
+    } else {
       setupNewRound();
     }
+  },650);
+}
 
-    function showMenuScreen() {
-      gameScreen.classList.add("hidden");
-      menuScreen.classList.remove("hidden");
-    }
+/* ============================================================
+    DRAG RESET
+============================================================ */
 
-    // ---------------------------
-    // MENÜYE DÖN SLIDER
-    // ---------------------------
-    let isDraggingBack = false;
-    let backStartX = 0;
-    let knobStartX = 0;
+function resetDragPosition(immediate){
+  dragOffsetX = 0;
+  dragOffsetY = 0;
 
-    function resetSlider() {
-      const trackWidth = backSlider.clientWidth;
-      const knobWidth = backKnob.clientWidth;
-      const maxX = trackWidth - knobWidth - 8;
-      backKnob.style.left = maxX + "px";
-    }
+  dragCard.style.transition = immediate ? "transform 0s" : "transform 0.25s ease";
+  dragCard.style.transform = "translate(0px, 0px)";
+}
 
-    backKnob.addEventListener("pointerdown", (e) => {
-      isDraggingBack = true;
-      backKnob.setPointerCapture(e.pointerId);
-      const rect = backKnob.getBoundingClientRect();
-      backStartX = e.clientX;
-      knobStartX = rect.left - backSlider.getBoundingClientRect().left;
-    });
+/* ============================================================
+    SES TUŞU
+============================================================ */
 
-    backKnob.addEventListener("pointermove", (e) => {
-      if (!isDraggingBack) return;
-      const trackWidth = backSlider.clientWidth;
-      const knobWidth = backKnob.clientWidth;
-      const maxX = trackWidth - knobWidth - 8;
-      const minX = 8;
-      const dx = e.clientX - backStartX;
-      let newX = knobStartX + dx;
-      if (newX < minX) newX = minX;
-      if (newX > maxX) newX = maxX;
-      backKnob.style.left = newX + "px";
-    });
+soundToggle.addEventListener("click", ()=>{
+  soundEnabled = !soundEnabled;
+  soundToggle.textContent = soundEnabled ? "🔊 Sesi Kapat" : "🔈 Sesi Aç";
+});
 
-    backKnob.addEventListener("pointerup", (e) => {
-      if (!isDraggingBack) return;
-      isDraggingBack = false;
-      backKnob.releasePointerCapture(e.pointerId);
-      const knobRect = backKnob.getBoundingClientRect();
-      const sliderRect = backSlider.getBoundingClientRect();
-      const offsetX = knobRect.left - sliderRect.left;
-      if (offsetX < 20) {
-        showMenuScreen();
-      } else {
-        resetSlider();
-      }
-    });
+/* ============================================================
+    BAŞLANGIÇ
+============================================================ */
 
-    // ---------------------------
-    // SEMBOLLER
-    // ---------------------------
-    let barStars = [];
-    let boardStars = [];
-    let countingMode = false;
-    let countingIndex = 0;
+resetSlider();
 
-    function initSymbols() {
-      symbolBar.innerHTML = "";
-      symbolBoard.innerHTML = "";
-      barStars = [];
-      boardStars = [];
-      for (let i = 0; i < MAX_SYMBOLS; i++) {
-        const barStar = document.createElement("span");
-        barStar.className = "symbol-star bar-star active";
-        barStar.textContent = "⭐";
-        symbolBar.appendChild(barStar);
-        barStars.push(barStar);
-
-        const boardStar = document.createElement("span");
-        boardStar.className = "symbol-star board-star";
-        boardStar.textContent = "⭐";
-        symbolBoard.appendChild(boardStar);
-        boardStars.push(boardStar);
-      }
-      countingMode = false;
-      countingIndex = 0;
-    }
-
-    function updateSymbols() {
-      barStars.forEach((star, index) => {
-        if (index < MAX_SYMBOLS - earnedSymbols) {
-          star.classList.add("active");
-        } else {
-          star.classList.remove("active");
-        }
-      });
-
-      boardStars.forEach((star, index) => {
-        if (index < earnedSymbols) {
-          star.classList.add("filled");
-        } else {
-          star.classList.remove("filled");
-        }
-        star.classList.remove("clickable");
-      });
-
-      if (earnedSymbols >= MAX_SYMBOLS) {
-        enableCountingMode();
-      }
-    }
-
-    function animateSymbolTransfer() {
-      const barRect = symbolBar.getBoundingClientRect();
-      const boardRect = symbolBoard.getBoundingClientRect();
-      const startX = barRect.left + barRect.width / 2;
-      const startY = barRect.top + barRect.height / 2;
-      const endX = boardRect.left + boardRect.width / 2;
-      const endY = boardRect.top + boardRect.height / 2;
-
-      const star = document.createElement("div");
-      star.className = "floating-star";
-      star.textContent = "⭐";
-      star.style.left = startX + "px";
-      star.style.top = startY + "px";
-      document.body.appendChild(star);
-
-      requestAnimationFrame(() => {
-        const dx = endX - startX;
-        const dy = endY - startY;
-        star.style.transform = `translate(${dx}px, ${dy}px)`;
-        star.style.opacity = "0";
-      });
-
-      setTimeout(() => {
-        document.body.removeChild(star);
-        updateSymbols();
-      }, 600);
-    }
-
-    function enableCountingMode() {
-      countingMode = true;
-      countingIndex = 0;
-      boardStars.forEach((star, index) => {
-        star.classList.add("clickable");
-        star.onclick = () => {
-          if (!countingMode) return;
-          if (index !== countingIndex) return;
-
-          if (countingIndex < countVoices.length) {
-            playSound(countVoices[countingIndex]);
-          }
-
-          boardStars[index].classList.remove("filled");
-          barStars[MAX_SYMBOLS - 1 - countingIndex].classList.add("active");
-
-          countingIndex++;
-          if (countingIndex >= MAX_SYMBOLS) {
-            countingMode = false;
-            earnedSymbols = 0;
-            playSound(allDoneVoice);
-            setTimeout(() => {
-              initSymbols();
-            }, 700);
-          }
-        };
-      });
-    }
-
-    // ---------------------------
-    // OYUN MANTIĞI
-    // ---------------------------
-    function randomItem() {
-      return items[Math.floor(Math.random() * items.length)];
-    }
-
-    function shuffle(arr) {
-      for (let i = arr.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
-      }
-      return arr;
-    }
-
-    function setupNewRound() {
-      canDrag = true;
-      dragCard.classList.remove("correct", "wrong");
-      correctCountForItem = 0;
-
-      currentTarget = randomItem();
-      setupOptionsForSameItem(true);
-
-      dragTitle.textContent = currentTarget.tr;
-      dragSubtitle.textContent = currentTarget.en;
-      dragImage.src = `assets/${currentTarget.id}.png`;
-      dragImage.alt = currentTarget.tr;
-
-      resetDragPosition(true);
-    }
-
-    function setupOptionsForSameItem(firstTime = false) {
-      const others = shuffle(
-        items.filter((x) => x.id !== currentTarget.id)
-      ).slice(0, Math.max(currentChoices - 1, 0));
-
-      currentOptions = shuffle([currentTarget, ...others]).slice(
-        0,
-        currentChoices
-      );
-
-      optionsRow.innerHTML = "";
-      currentOptions.forEach((item) => {
-        const card = document.createElement("div");
-        card.className = "card option-card";
-        card.dataset.id = item.id;
-
-        const titleDiv = document.createElement("div");
-        titleDiv.className = "card-title";
-        titleDiv.textContent = item.tr;
-
-        const imageDiv = document.createElement("div");
-        imageDiv.className = "card-image";
-        const img = document.createElement("img");
-        img.src = `assets/${item.id}.png`;
-        img.alt = item.tr;
-        imageDiv.appendChild(img);
-
-        const subDiv = document.createElement("div");
-        subDiv.className = "card-subtitle";
-        subDiv.textContent = item.en;
-
-        card.appendChild(titleDiv);
-        card.appendChild(imageDiv);
-        card.appendChild(subDiv);
-
-        optionsRow.appendChild(card);
-      });
-
-      if (!firstTime) {
-        resetDragPosition(true);
-        dragCard.classList.remove("correct", "wrong");
-      }
-    }
-
-    // ---------------------------
-    // DRAG & DROP (BASİT VE STABİL)
-    // ---------------------------
-    let isDraggingCard = false;
-    let dragStartX = 0;
-    let dragStartY = 0;
-    let dragOffsetX = 0;
-    let dragOffsetY = 0;
-    let activePointerId = null;
-
-    function resetDragPosition(immediate = false) {
-      const duration = immediate ? "0s" : "0.25s";
-      dragOffsetX = 0;
-      dragOffsetY = 0;
-      dragCard.style.transition = `transform ${duration} ease`;
-      dragCard.style.transform = "translate(0px, 0px)";
-    }
-
-    dragCard.addEventListener("pointerdown", (e) => {
-      if (!canDrag) return;
-      isDraggingCard = true;
-      activePointerId = e.pointerId;
-      dragCard.setPointerCapture(activePointerId);
-      dragCard.style.transition = "none";
-      dragCard.style.cursor = "grabbing";
-      dragStartX = e.clientX;
-      dragStartY = e.clientY;
-    });
-
-    dragCard.addEventListener("pointermove", (e) => {
-      if (!isDraggingCard || e.pointerId !== activePointerId) return;
-      const dx = e.clientX - dragStartX;
-      const dy = e.clientY - dragStartY;
-      const newX = dragOffsetX + dx;
-      const newY = dragOffsetY + dy;
-      dragCard.style.transform = `translate(${newX}px, ${newY}px)`;
-    });
-
-    dragCard.addEventListener("pointerup", (e) => {
-      if (!isDraggingCard || e.pointerId !== activePointerId) return;
-      isDraggingCard = false;
-      dragCard.releasePointerCapture(activePointerId);
-      dragCard.style.cursor = "grab";
-
-      const dx = e.clientX - dragStartX;
-      const dy = e.clientY - dragStartY;
-      dragOffsetX += dx;
-      dragOffsetY += dy;
-
-      handleDrop();
-    });
-
-    dragCard.addEventListener("pointercancel", () => {
-      isDraggingCard = false;
-      dragCard.style.cursor = "grab";
-      resetDragPosition(true);
-    });
-
-    // ---------------------------
-    // DROP KONTROLÜ
-    // ---------------------------
-    function handleDrop() {
-      const dragRect = dragCard.getBoundingClientRect();
-      const optionCards = Array.from(document.querySelectorAll(".option-card"));
-      let hitCard = null;
-      let hitItem = null;
-
-      for (let i = 0; i < optionCards.length; i++) {
-        const card = optionCards[i];
-        const rect = card.getBoundingClientRect();
-        const overlap =
-          dragRect.right > rect.left &&
-          dragRect.left < rect.right &&
-          dragRect.bottom > rect.top &&
-          dragRect.top < rect.bottom;
-        if (overlap) {
-          hitCard = card;
-          hitItem = currentOptions[i];
-          break;
-        }
-      }
-
-      if (!hitCard || !hitItem) {
-        showWrongFeedback();
-        return;
-      }
-
-      if (hitItem.id === currentTarget.id) {
-        showCorrectFeedback(hitCard);
-      } else {
-        showWrongFeedback();
-      }
-    }
-
-    function showWrongFeedback() {
-      dragCard.classList.add("wrong");
-      canDrag = false;
-      setTimeout(() => {
-        dragCard.classList.remove("wrong");
-        resetDragPosition(false);
-        setTimeout(() => {
-          canDrag = true;
-        }, 260);
-      }, 260);
-    }
-
-    function showCorrectFeedback(targetCard) {
-      canDrag = false;
-      dragCard.classList.add("correct");
-      targetCard.classList.add("correct");
-
-      const dragRect = dragCard.getBoundingClientRect();
-      const targetRect = targetCard.getBoundingClientRect();
-      const dx =
-        targetRect.left + targetRect.width / 2 -
-        (dragRect.left + dragRect.width / 2);
-      const dy =
-        targetRect.top + targetRect.height / 2 -
-        (dragRect.top + dragRect.height / 2);
-
-      dragCard.style.transition = "transform 0.35s ease";
-      dragCard.style.transform = `translate(${dragOffsetX + dx}px, ${dragOffsetY + dy}px)`;
-
-      if (earnedSymbols < MAX_SYMBOLS) {
-        earnedSymbols++;
-        animateSymbolTransfer();
-        const voice =
-          successVoices[Math.floor(Math.random() * successVoices.length)];
-        playSound(voice);
-      }
-
-      setTimeout(() => {
-        targetCard.classList.remove("correct");
-        dragCard.classList.remove("correct");
-        resetDragPosition(true);
-
-        correctCountForItem++;
-        if (correctCountForItem < 2) {
-          setupOptionsForSameItem(false);
-          canDrag = true;
-        } else {
-          setTimeout(() => {
-            setupNewRound();
-          }, 80);
-        }
-      }, 650);
-    }
-
-    // ---------------------------
-    // BAŞLANGIÇ
-    // ---------------------------
-    updateSoundToggle();
-    // Başlangıçta menü açık, oyuna girince setupNewRound çalışacak
-  </script>
+</script>
 </body>
 </html>
-
