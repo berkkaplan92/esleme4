@@ -1048,8 +1048,8 @@
 
     updateSoundToggle();
     // Başta menü görünecek, oyuna girince setupNewRound çağrılacak
-document.body.addEventListener("click", () => {
-  console.log("BODY TIKLANDI");
+document.addEventListener("pointermove", (e) => {
+  console.log("Üzerinde:", e.target.id || e.target.className);
 });
 
   </script>
