@@ -782,38 +782,33 @@ let dragStartY = 0;
 let dragOffsetX = 0;
 let dragOffsetY = 0;
 
-dragCard.addEventListener("pointerdown", (e)=>{
-  if(!canDrag) return;
+dragCard.addEventListener("pointerdown", (e) => {
+  if (!canDrag) return;
 
   isDraggingCard = true;
   activePointerId = e.pointerId;
 
-  // ⭐ EN ÖNEMLİ FİX:
-  dragOffsetX = 0;
-  dragOffsetY = 0;
+  const rect = dragCard.getBoundingClientRect();
+  dragStartX = e.clientX - rect.left;
+  dragStartY = e.clientY - rect.top;
 
   dragCard.setPointerCapture(activePointerId);
   dragCard.style.transition = "none";
   dragCard.style.cursor = "grabbing";
-
-  dragStartX = e.clientX;
-  dragStartY = e.clientY;
 });
 
-dragCard.addEventListener("pointermove", (e)=>{
-  if(!isDraggingCard || e.pointerId !== activePointerId) return;
+dragCard.addEventListener("pointermove", (e) => {
+  if (!isDraggingCard || e.pointerId !== activePointerId) return;
 
-  const dx = e.clientX - dragStartX;
-  const dy = e.clientY - dragStartY;
+  const x = e.clientX - dragStartX;
+  const y = e.clientY - dragStartY;
 
-  dragOffsetX = dx;
-  dragOffsetY = dy;
-
-  dragCard.style.transform = `translate(${dragOffsetX}px, ${dragOffsetY}px)`;
+  dragCard.style.transform = `translate(${x}px, ${y}px)`;
 });
 
-dragCard.addEventListener("pointerup", (e)=>{
-  if(!isDraggingCard || e.pointerId !== activePointerId) return;
+
+dragCard.addEventListener("pointerup", (e) => {
+  if (!isDraggingCard || e.pointerId !== activePointerId) return;
 
   isDraggingCard = false;
   dragCard.releasePointerCapture(activePointerId);
