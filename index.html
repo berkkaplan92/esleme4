@@ -316,7 +316,7 @@
       position: absolute;
       right: 40px;
       bottom: 30px;
-      width: 360px;
+      width: 380px;
       height: 110px;
       border-radius: 16px;
       background: rgba(255, 255, 255, 0.5);
@@ -540,6 +540,8 @@
     let earnedSymbols = 0;
     let barStars = [];
     let boardStars = [];
+    let countingMode = false;
+    let countingIndex = 0;
 
     // Ses toggle (şimdilik sadece yazı değişiyor)
     let soundEnabled = true;
@@ -650,7 +652,52 @@
         if (i < earnedSymbols) s.classList.add("filled");
         else s.classList.remove("filled");
       });
-    }
+      // Her seferinde eski tıklamaları sıfırla
+  boardStars.forEach((star) => {
+    star.style.cursor = "default";
+    star.onclick = null;
+  });
+
+  // 8 sembole ulaştıysak geri sayma modunu aç
+  if (earnedSymbols >= MAX_SYMBOLS) {
+    enableCountingMode();
+  }
+}
+    function enableCountingMode() {
+  countingMode = true;
+  countingIndex = 0;
+
+  boardStars.forEach((star, index) => {
+    star.style.cursor = "pointer";
+
+    star.onclick = () => {
+      if (!countingMode) return;
+      if (index !== countingIndex) return; // sırayla tıklanacak
+
+      // Bu yıldızı tahtadan sil
+      star.classList.remove("filled");
+
+      // Bar tarafında geri doldur (tersten)
+      const barIndex = MAX_SYMBOLS - 1 - countingIndex;
+      if (barStars[barIndex]) {
+        barStars[barIndex].classList.add("active");
+      }
+
+      countingIndex++;
+
+      // Hepsi sayıldıysa sıfırla
+      if (countingIndex >= MAX_SYMBOLS) {
+        countingMode = false;
+        earnedSymbols = 0;
+
+        setTimeout(() => {
+          initSymbols();
+          updateSymbols();
+        }, 600);
+      }
+    };
+  });
+}
 
     function animateSymbolTransfer() {
       const barRect = symbolBar.getBoundingClientRect();
