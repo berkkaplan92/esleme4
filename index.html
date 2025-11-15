@@ -515,6 +515,34 @@
       { id: "maymun", tr: "MAYMUN", en: "Monkey" },
       { id: "keci", tr: "KEÇİ", en: "Goat" }
     ];
+    // SESLER
+const successVoices = [
+  new Audio("sounds/correct1.mp3"),
+  new Audio("sounds/correct2.mp3"),
+  new Audio("sounds/correct3.mp3"),
+  new Audio("sounds/correct4.mp3")
+];
+
+const countVoices = [
+  new Audio("sounds/count1.mp3"),
+  new Audio("sounds/count2.mp3"),
+  new Audio("sounds/count3.mp3"),
+  new Audio("sounds/count4.mp3"),
+  new Audio("sounds/count5.mp3"),
+  new Audio("sounds/count6.mp3"),
+  new Audio("sounds/count7.mp3"),
+  new Audio("sounds/count8.mp3")
+];
+
+const letsCountVoice = new Audio("sounds/letsCount.mp3");
+const allDoneVoice = new Audio("sounds/final.mp3");
+
+function playSound(audio) {
+  if (!soundEnabled) return;
+  audio.currentTime = 0;
+  audio.play().catch(()=>{});
+}
+
 
     // ELEMENTLER
     const menuScreen = document.getElementById("menuScreen");
@@ -660,9 +688,16 @@
 
   // 8 sembole ulaştıysak geri sayma modunu aç
   if (earnedSymbols >= MAX_SYMBOLS) {
-    enableCountingMode();
-  }
+
+    // 🔊 Yeni eklenen yönlendirme sesi
+    playSound(letsCountVoice);
+
+    // Ses bittikten sonra sayma modu başlasın
+    setTimeout(() => {
+        enableCountingMode();
+    }, 1200);
 }
+
     function enableCountingMode() {
   countingMode = true;
   countingIndex = 0;
@@ -689,6 +724,7 @@
       if (countingIndex >= MAX_SYMBOLS) {
         countingMode = false;
         earnedSymbols = 0;
+        playSound(allDoneVoice);
 
         setTimeout(() => {
           initSymbols();
@@ -890,6 +926,7 @@
       if (earnedSymbols < MAX_SYMBOLS) {
         earnedSymbols++;
         animateSymbolTransfer();
+        playSound(successVoices[Math.floor(Math.random() * successVoices.length)]);
       }
 
       setTimeout(() => {
