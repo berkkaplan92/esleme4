@@ -720,7 +720,7 @@ function enableCountingMode() {
     star.onclick = () => {
       if (!countingMode) return;
       if (index !== countingIndex) return;
-
+      playSound(countVoices[countingIndex]);
       star.classList.remove("filled");
 
       const barIndex = MAX_SYMBOLS - 1 - countingIndex;
