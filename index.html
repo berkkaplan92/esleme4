@@ -720,9 +720,15 @@ function enableCountingMode() {
     star.onclick = () => {
       if (!countingMode) return;
       if (index !== countingIndex) return;
+
+      // 1–7 normal
+      // 8 için gecikme yok (sadece tebrik sesini geciktiriyoruz)
       playSound(countVoices[countingIndex]);
+
+      // Yıldızı tahta üzerinden kaldır
       star.classList.remove("filled");
 
+      // Bar tarafına geri koy
       const barIndex = MAX_SYMBOLS - 1 - countingIndex;
       if (barStars[barIndex]) {
         barStars[barIndex].classList.add("active");
@@ -730,15 +736,23 @@ function enableCountingMode() {
 
       countingIndex++;
 
+      // 8'e (son yıldıza) ulaştıysan
       if (countingIndex >= MAX_SYMBOLS) {
         countingMode = false;
         earnedSymbols = 0;
-        playSound(allDoneVoice);
 
+        // 🟡 "Harika tüm sembolleri topladın!" gecikmeli gelsin
+        setTimeout(() => {
+          playSound(allDoneVoice);
+        }, 900); // 0.9 saniyelik gecikme — istersen 1200 yapabilirsin
+
+        // 1.6 sn sonra sembolleri sıfırla
         setTimeout(() => {
           initSymbols();
           updateSymbols();
-        }, 600);
+        }, 1600);
+
+        return;
       }
     };
   });
